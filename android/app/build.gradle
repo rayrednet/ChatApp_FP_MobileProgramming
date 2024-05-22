@@ -32,9 +32,9 @@ android {
 
     signingConfigs {
         debug {
-            keyAlias 'KeyAlias'
+            keyAlias 'upload'
             keyPassword 'android'
-            storeFile file("keystore/chatdebug.keystore")
+            storeFile file("keystore/debug.keystore")
             storePassword 'android'
         }
     }
