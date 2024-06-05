@@ -168,6 +168,7 @@ class HomePageState extends State<HomePage> {
           children: [
             Column(
               children: [
+                _buildStory(),
                 _buildSearchBar(),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
@@ -200,6 +201,7 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
+                _buildUploadStoryButton(),
               ],
             ),
             Positioned(
@@ -207,6 +209,57 @@ class HomePageState extends State<HomePage> {
             )
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildStory(){
+    return ElevatedButton(
+      child: const Text('show stories'),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return const StoryPage();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUploadStoryButton() {
+    return Container(
+      child: BottomNavigationBar(
+
+        onTap: (int index) {
+          setState(() {
+              if(index == 1){
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => StoryMenuPage(),
+                  ),
+                );
+              }
+            // Navigate to corresponding page based on index
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Story',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
       ),
     );
   }

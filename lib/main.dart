@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/firebase_options.dart';
+import 'package:flutter_chat_demo/providers/story_page_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +55,27 @@ class MyApp extends StatelessWidget {
         ),
         Provider<ChatProvider>(
           create: (_) => ChatProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<UploadStoryProvider>(
+          create: (_) => UploadStoryProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<StoryPageProvider>(
+          create: (_) => StoryPageProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<StoryMenuProvider>(
+          create: (_) => StoryMenuProvider(
             prefs: this.prefs,
             firebaseFirestore: this._firebaseFirestore,
             firebaseStorage: this._firebaseStorage,
