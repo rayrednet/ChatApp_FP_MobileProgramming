@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:flutter_chat_demo/pages/pages.dart';
+import 'package:flutter_chat_demo/providers/friend_provider.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/utils/utils.dart';
 import 'package:flutter_chat_demo/widgets/widgets.dart';
@@ -33,6 +34,7 @@ class HomePageState extends State<HomePage> {
 
   late final _authProvider = context.read<AuthProvider>();
   late final _homeProvider = context.read<HomeProvider>();
+  late final _friendProvider = context.read<FriendProvider>();
   late final String _currentUserId;
 
   final _searchDebouncer = Debouncer(milliseconds: 300);
@@ -170,19 +172,21 @@ class HomePageState extends State<HomePage> {
               children: [
                 _buildSearchBar(),
                 Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: _homeProvider.getStreamFireStore(
+                  child: StreamBuilder<List<DocumentSnapshot>>(
+                    stream: _friendProvider.getStreamFireStore(
                       FirestoreConstants.pathUserCollection,
-                      _limit,
+                      FirestoreConstants.pathFriendCollection,
+                      _currentUserId,
                       _textSearch,
                     ),
                     builder: (_, snapshot) {
+                      print(snapshot.hasData);
                       if (snapshot.hasData) {
-                        if ((snapshot.data?.docs.length ?? 0) > 0) {
+                        if ((snapshot.data?.length ?? 0) > 0) {
                           return ListView.builder(
                             padding: EdgeInsets.all(10),
-                            itemBuilder: (_, index) => _buildItem(snapshot.data?.docs[index]),
-                            itemCount: snapshot.data?.docs.length,
+                            itemBuilder: (_, index) => _buildItem(snapshot.data?[index]),
+                            itemCount: snapshot.data?.length,
                             controller: _listScrollController,
                           );
                         } else {

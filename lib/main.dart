@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/firebase_options.dart';
+import 'package:flutter_chat_demo/providers/friend_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -57,6 +58,11 @@ class MyApp extends StatelessWidget {
             prefs: this.prefs,
             firebaseFirestore: this._firebaseFirestore,
             firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<FriendProvider>(
+          create: (_) => FriendProvider(
+            firebaseFirestore: this._firebaseFirestore,
           ),
         ),
       ],
