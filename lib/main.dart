@@ -72,7 +72,17 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorSchemeSeed: ColorConstants.themeColor,
         ),
-        home: SplashPage(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => SplashPage(),
+          '/chats': (context) => HomePage(), // Current Home Page for Chats
+          '/friends': (context) => ContactsPage(),
+          '/stories': (context) => StoriesPage(),
+          '/profile': (context) => UserProfilePage(),
+          '/login': (context) => LoginPage(),
+          '/settings': (context) => SettingsPage(),
+          '/full_photo': (context) => FullPhotoPage(url: '',),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );

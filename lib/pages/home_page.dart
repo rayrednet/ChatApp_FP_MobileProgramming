@@ -14,6 +14,7 @@ import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import '../widgets/bottom_navbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -45,6 +46,8 @@ class HomePageState extends State<HomePage> {
     MenuSetting(title: 'Settings', icon: Icons.settings),
     MenuSetting(title: 'Log out', icon: Icons.exit_to_app),
   ];
+
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -86,7 +89,8 @@ class HomePageState extends State<HomePage> {
     _firebaseMessaging.getToken().then((token) {
       print('push token: $token');
       if (token != null) {
-        _homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, _currentUserId, {'pushToken': token});
+        _homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection,
+            _currentUserId, {'pushToken': token});
       }
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
@@ -94,7 +98,8 @@ class HomePageState extends State<HomePage> {
   }
 
   void _configLocalNotification() {
-    final initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    final initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
     final initializationSettingsIOS = DarwinInitializationSettings();
     final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
@@ -104,7 +109,8 @@ class HomePageState extends State<HomePage> {
   }
 
   void _scrollListener() {
-    if (_listScrollController.offset >= _listScrollController.position.maxScrollExtent &&
+    if (_listScrollController.offset >=
+            _listScrollController.position.maxScrollExtent &&
         !_listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
@@ -116,13 +122,16 @@ class HomePageState extends State<HomePage> {
     if (choice.title == 'Log out') {
       _handleSignOut();
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsPage()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => SettingsPage()));
     }
   }
 
   void _showNotification(RemoteNotification remoteNotification) async {
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
+      Platform.isAndroid
+          ? 'com.dfa.flutterchatdemo'
+          : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       playSound: true,
       enableVibration: true,
@@ -152,6 +161,27 @@ class HomePageState extends State<HomePage> {
       MaterialPageRoute(builder: (_) => LoginPage()),
       (_) => false,
     );
+  }
+
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/chats');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/friends');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/stories');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+    }
   }
 
   @override
@@ -212,6 +242,10 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onBottomNavTap,
+      ),
     );
   }
 
@@ -246,7 +280,8 @@ class HomePageState extends State<HomePage> {
               },
               decoration: InputDecoration.collapsed(
                 hintText: 'Search by nickname (type exactly case sensitive)',
-                hintStyle: TextStyle(fontSize: 13, color: ColorConstants.greyColor),
+                hintStyle:
+                    TextStyle(fontSize: 13, color: ColorConstants.greyColor),
               ),
               style: TextStyle(fontSize: 13),
             ),
@@ -263,7 +298,8 @@ class HomePageState extends State<HomePage> {
                           _textSearch = "";
                         });
                       },
-                      child: Icon(Icons.clear_rounded, color: ColorConstants.greyColor, size: 20))
+                      child: Icon(Icons.clear_rounded,
+                          color: ColorConstants.greyColor, size: 20))
                   : SizedBox.shrink();
             },
           ),
@@ -332,8 +368,10 @@ class HomePageState extends State<HomePage> {
                               child: Center(
                                 child: CircularProgressIndicator(
                                   color: ColorConstants.themeColor,
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               ),
@@ -361,7 +399,8 @@ class HomePageState extends State<HomePage> {
                           child: Text(
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
-                            style: TextStyle(color: ColorConstants.primaryColor),
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
@@ -370,7 +409,8 @@ class HomePageState extends State<HomePage> {
                           child: Text(
                             'About me: ${userChat.aboutMe}',
                             maxLines: 1,
-                            style: TextStyle(color: ColorConstants.primaryColor),
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -400,7 +440,8 @@ class HomePageState extends State<HomePage> {
               );
             },
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
+              backgroundColor:
+                  MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
               shape: MaterialStateProperty.all<OutlinedBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),
