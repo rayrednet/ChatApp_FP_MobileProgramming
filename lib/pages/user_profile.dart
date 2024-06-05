@@ -11,7 +11,6 @@ import 'package:flutter_chat_demo/widgets/loading_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../widgets/bottom_navbar.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -23,11 +22,13 @@ class UserProfilePage extends StatefulWidget {
 class UserProfilePageState extends State<UserProfilePage> {
   late final TextEditingController _controllerNickname;
   late final TextEditingController _controllerAboutMe;
+  late final TextEditingController _controllerFriendCode;
 
   String _userId = '';
   String _nickname = '';
   String _aboutMe = '';
   String _avatarUrl = '';
+  String _friendCode = '';
 
   bool _isLoading = false;
   File? _avatarFile;
@@ -35,8 +36,7 @@ class UserProfilePageState extends State<UserProfilePage> {
 
   final _focusNodeNickname = FocusNode();
   final _focusNodeAboutMe = FocusNode();
-
-  int _selectedIndex = 3;
+  final _focusNodeFriendCode = FocusNode();
 
   @override
   void initState() {
@@ -50,17 +50,17 @@ class UserProfilePageState extends State<UserProfilePage> {
       _nickname = _settingProvider.getPref(FirestoreConstants.nickname) ?? "";
       _aboutMe = _settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
       _avatarUrl = _settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
+      _friendCode = _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
     });
 
     _controllerNickname = TextEditingController(text: _nickname);
     _controllerAboutMe = TextEditingController(text: _aboutMe);
+    _controllerFriendCode = TextEditingController(text: _friendCode);
   }
 
   Future<bool> _pickAvatar() async {
     final imagePicker = ImagePicker();
-    final pickedXFile = await imagePicker
-        .pickImage(source: ImageSource.gallery)
-        .catchError((err) {
+    final pickedXFile = await imagePicker.pickImage(source: ImageSource.gallery).catchError((err) {
       Fluttertoast.showToast(msg: err.toString());
       return null;
     });
@@ -87,10 +87,10 @@ class UserProfilePageState extends State<UserProfilePage> {
         photoUrl: _avatarUrl,
         nickname: _nickname,
         aboutMe: _aboutMe,
+        friendCode: _friendCode,
       );
       _settingProvider
-          .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId,
-              updateInfo.toJson())
+          .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
           .then((_) async {
         await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
         setState(() {
@@ -123,14 +123,15 @@ class UserProfilePageState extends State<UserProfilePage> {
       photoUrl: _avatarUrl,
       nickname: _nickname,
       aboutMe: _aboutMe,
+      friendCode: _friendCode,
     );
     _settingProvider
-        .updateDataFirestore(
-            FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
+        .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
         .then((_) async {
       await _settingProvider.setPref(FirestoreConstants.nickname, _nickname);
       await _settingProvider.setPref(FirestoreConstants.aboutMe, _aboutMe);
       await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
+      await _settingProvider.setPref(FirestoreConstants.friendCode, _friendCode);
 
       setState(() {
         _isLoading = false;
@@ -144,27 +145,6 @@ class UserProfilePageState extends State<UserProfilePage> {
 
       Fluttertoast.showToast(msg: err.toString());
     });
-  }
-
-  void _onBottomNavTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/chats');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/friends');
-        break;
-      case 2:
-        Navigator.pushReplacementNamed(context, '/stories');
-        break;
-      case 3:
-        // Current page, no need to navigate
-        break;
-    }
   }
 
   @override
@@ -216,13 +196,9 @@ class UserProfilePageState extends State<UserProfilePage> {
                                       child: Center(
                                         child: CircularProgressIndicator(
                                           color: ColorConstants.themeColor,
-                                          value: loadingProgress
-                                                      .expectedTotalBytes !=
-                                                  null
-                                              ? loadingProgress
-                                                      .cumulativeBytesLoaded /
-                                                  loadingProgress
-                                                      .expectedTotalBytes!
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                                  loadingProgress.expectedTotalBytes!
                                               : null,
                                         ),
                                       ),
@@ -252,7 +228,7 @@ class UserProfilePageState extends State<UserProfilePage> {
                     // Username
                     Container(
                       child: Text(
-                        'Name',
+                        'Nickname',
                         style: TextStyle(
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.bold,
@@ -263,14 +239,12 @@ class UserProfilePageState extends State<UserProfilePage> {
                     ),
                     Container(
                       child: Theme(
-                        data: Theme.of(context).copyWith(
-                            primaryColor: ColorConstants.primaryColor),
+                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: 'Sweetie',
                             contentPadding: EdgeInsets.all(5),
-                            hintStyle:
-                                TextStyle(color: ColorConstants.greyColor),
+                            hintStyle: TextStyle(color: ColorConstants.greyColor),
                           ),
                           controller: _controllerNickname,
                           onChanged: (value) {
@@ -296,18 +270,47 @@ class UserProfilePageState extends State<UserProfilePage> {
                     ),
                     Container(
                       child: Theme(
-                        data: Theme.of(context).copyWith(
-                            primaryColor: ColorConstants.primaryColor),
+                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
                         child: TextField(
                           decoration: InputDecoration(
                             hintText: 'Fun, like travel and play PES...',
                             contentPadding: EdgeInsets.all(5),
-                            hintStyle:
-                                TextStyle(color: ColorConstants.greyColor),
+                            hintStyle: TextStyle(color: ColorConstants.greyColor),
                           ),
                           controller: _controllerAboutMe,
                           onChanged: (value) {
                             _aboutMe = value;
+                          },
+                          focusNode: _focusNodeAboutMe,
+                        ),
+                      ),
+                      margin: EdgeInsets.only(left: 30, right: 30),
+                    ),
+
+                    // Friend code
+                    Container(
+                      child: Text(
+                        'Friend Code',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          color: ColorConstants.primaryColor,
+                        ),
+                      ),
+                      margin: EdgeInsets.only(left: 10, top: 30, bottom: 5),
+                    ),
+                    Container(
+                      child: Theme(
+                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            // hintText: 'Fun, like travel and play PES...',
+                            contentPadding: EdgeInsets.all(5),
+                            hintStyle: TextStyle(color: ColorConstants.greyColor),
+                          ),
+                          controller: _controllerFriendCode,
+                          onChanged: (value) {
+                            _friendCode = value;
                           },
                           focusNode: _focusNodeAboutMe,
                         ),
@@ -327,8 +330,7 @@ class UserProfilePageState extends State<UserProfilePage> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          ColorConstants.primaryColor),
+                      backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.primaryColor),
                       padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.fromLTRB(30, 10, 30, 10),
                       ),
@@ -344,10 +346,6 @@ class UserProfilePageState extends State<UserProfilePage> {
           // Loading
           Positioned(child: _isLoading ? LoadingView() : SizedBox.shrink()),
         ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
       ),
     );
   }
