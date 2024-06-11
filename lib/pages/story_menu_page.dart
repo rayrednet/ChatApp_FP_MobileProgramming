@@ -93,7 +93,7 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
                     MaterialPageRoute(builder: (context) => StoryPage()),
                   );
                 },
-                  child: Text(sampleUsers[index].userName)
+                  child: Image.network(sampleUsers[index].imageUrl)
               ),
             );
           },
