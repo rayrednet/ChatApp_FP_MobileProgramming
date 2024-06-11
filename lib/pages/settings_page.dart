@@ -22,11 +22,13 @@ class SettingsPage extends StatefulWidget {
 class SettingsPageState extends State<SettingsPage> {
   late final TextEditingController _controllerNickname;
   late final TextEditingController _controllerAboutMe;
+  late final TextEditingController _controllerFriendCode;
 
   String _userId = '';
   String _nickname = '';
   String _aboutMe = '';
   String _avatarUrl = '';
+  String _friendCode = '';
 
   bool _isLoading = false;
   File? _avatarFile;
@@ -34,6 +36,7 @@ class SettingsPageState extends State<SettingsPage> {
 
   final _focusNodeNickname = FocusNode();
   final _focusNodeAboutMe = FocusNode();
+  final _focusNodeFriendCode = FocusNode();
 
   @override
   void initState() {
@@ -47,10 +50,12 @@ class SettingsPageState extends State<SettingsPage> {
       _nickname = _settingProvider.getPref(FirestoreConstants.nickname) ?? "";
       _aboutMe = _settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
       _avatarUrl = _settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
+      _friendCode = _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
     });
 
     _controllerNickname = TextEditingController(text: _nickname);
     _controllerAboutMe = TextEditingController(text: _aboutMe);
+    _controllerFriendCode = TextEditingController(text: _friendCode);
   }
 
   Future<bool> _pickAvatar() async {
@@ -82,6 +87,7 @@ class SettingsPageState extends State<SettingsPage> {
         photoUrl: _avatarUrl,
         nickname: _nickname,
         aboutMe: _aboutMe,
+        friendCode: _friendCode,
       );
       _settingProvider
           .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
@@ -117,6 +123,7 @@ class SettingsPageState extends State<SettingsPage> {
       photoUrl: _avatarUrl,
       nickname: _nickname,
       aboutMe: _aboutMe,
+      friendCode: _friendCode,
     );
     _settingProvider
         .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
@@ -124,6 +131,7 @@ class SettingsPageState extends State<SettingsPage> {
       await _settingProvider.setPref(FirestoreConstants.nickname, _nickname);
       await _settingProvider.setPref(FirestoreConstants.aboutMe, _aboutMe);
       await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
+      await _settingProvider.setPref(FirestoreConstants.friendCode, _friendCode);
 
       setState(() {
         _isLoading = false;
@@ -272,6 +280,37 @@ class SettingsPageState extends State<SettingsPage> {
                           controller: _controllerAboutMe,
                           onChanged: (value) {
                             _aboutMe = value;
+                          },
+                          focusNode: _focusNodeAboutMe,
+                        ),
+                      ),
+                      margin: EdgeInsets.only(left: 30, right: 30),
+                    ),
+
+                    // Friend code
+                    Container(
+                      child: Text(
+                        'Friend Code',
+                        style: TextStyle(
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.bold,
+                          color: ColorConstants.primaryColor,
+                        ),
+                      ),
+                      margin: EdgeInsets.only(left: 10, top: 30, bottom: 5),
+                    ),
+                    Container(
+                      child: Theme(
+                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            // hintText: 'Fun, like travel and play PES...',
+                            contentPadding: EdgeInsets.all(5),
+                            hintStyle: TextStyle(color: ColorConstants.greyColor),
+                          ),
+                          controller: _controllerFriendCode,
+                          onChanged: (value) {
+                            _friendCode = value;
                           },
                           focusNode: _focusNodeAboutMe,
                         ),

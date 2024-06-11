@@ -4,4 +4,6 @@ class AppConstants {
   static const homeTitle = "Home";
   static const settingsTitle = "Settings";
   static const fullPhotoTitle = "Full Photo";
+  static const uploadStoryTitle = 'Upload Story';
+  static const storyTitle = 'Story';
 }

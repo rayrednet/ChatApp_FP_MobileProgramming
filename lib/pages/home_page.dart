@@ -7,12 +7,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/models/models.dart';
 import 'package:flutter_chat_demo/pages/pages.dart';
+import 'package:flutter_chat_demo/providers/friend_provider.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/utils/utils.dart';
 import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import '../widgets/bottom_navbar.dart';
+import 'new_chat_page.dart';
+import 'new_group_page.dart';
+
+enum ChatOptions { newChat, newGroup }
+
+Map<ChatOptions, String> optionsText = {
+  ChatOptions.newChat: "New chat",
+  ChatOptions.newGroup: "New group",
+};
+
+Map<ChatOptions, IconData> optionsIcons = {
+  ChatOptions.newChat: Icons.chat,
+  ChatOptions.newGroup: Icons.group,
+};
+
+String _selectedChatType = 'All';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -33,6 +51,7 @@ class HomePageState extends State<HomePage> {
 
   late final _authProvider = context.read<AuthProvider>();
   late final _homeProvider = context.read<HomeProvider>();
+  late final _friendProvider = context.read<FriendProvider>();
   late final String _currentUserId;
 
   final _searchDebouncer = Debouncer(milliseconds: 300);
@@ -43,6 +62,8 @@ class HomePageState extends State<HomePage> {
     MenuSetting(title: 'Settings', icon: Icons.settings),
     MenuSetting(title: 'Log out', icon: Icons.exit_to_app),
   ];
+
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -84,7 +105,8 @@ class HomePageState extends State<HomePage> {
     _firebaseMessaging.getToken().then((token) {
       print('push token: $token');
       if (token != null) {
-        _homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection, _currentUserId, {'pushToken': token});
+        _homeProvider.updateDataFirestore(FirestoreConstants.pathUserCollection,
+            _currentUserId, {'pushToken': token});
       }
     }).catchError((err) {
       Fluttertoast.showToast(msg: err.message.toString());
@@ -92,7 +114,8 @@ class HomePageState extends State<HomePage> {
   }
 
   void _configLocalNotification() {
-    final initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
+    final initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
     final initializationSettingsIOS = DarwinInitializationSettings();
     final initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
@@ -102,7 +125,8 @@ class HomePageState extends State<HomePage> {
   }
 
   void _scrollListener() {
-    if (_listScrollController.offset >= _listScrollController.position.maxScrollExtent &&
+    if (_listScrollController.offset >=
+            _listScrollController.position.maxScrollExtent &&
         !_listScrollController.position.outOfRange) {
       setState(() {
         _limit += _limitIncrement;
@@ -114,13 +138,16 @@ class HomePageState extends State<HomePage> {
     if (choice.title == 'Log out') {
       _handleSignOut();
     } else {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => SettingsPage()));
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => SettingsPage()));
     }
   }
 
   void _showNotification(RemoteNotification remoteNotification) async {
     final androidPlatformChannelSpecifics = AndroidNotificationDetails(
-      Platform.isAndroid ? 'com.dfa.flutterchatdemo' : 'com.duytq.flutterchatdemo',
+      Platform.isAndroid
+          ? 'com.dfa.flutterchatdemo'
+          : 'com.duytq.flutterchatdemo',
       'Flutter chat demo',
       playSound: true,
       enableVibration: true,
@@ -152,42 +179,106 @@ class HomePageState extends State<HomePage> {
     );
   }
 
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/chats');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/friends');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/stories');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
+    }
+  }
+
+  void _createNewChat() {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+          100, 600, 20, 100), // Adjust the position as needed
+      items: ChatOptions.values.map((ChatOptions option) {
+        return PopupMenuItem<ChatOptions>(
+          value: option,
+          child: Row(
+            children: [
+              Icon(optionsIcons[option], color: Colors.black),
+              SizedBox(width: 10),
+              Text(optionsText[option]!),
+            ],
+          ),
+        );
+      }).toList(),
+    ).then((ChatOptions? selectedOption) {
+      if (selectedOption == null) return;
+
+      switch (selectedOption) {
+        case ChatOptions.newChat:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewChatPage()),
+          );
+          break;
+        case ChatOptions.newGroup:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewGroupPage()),
+          );
+          break;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppConstants.homeTitle,
-          style: TextStyle(color: ColorConstants.primaryColor),
+        title: Row(
+          children: [
+            Text(
+              'ChatterBox',
+              style: TextStyle(color: ColorConstants.primaryColor),
+            ),
+          ],
         ),
-        centerTitle: true,
-        actions: [_buildPopupMenu()],
       ),
       body: SafeArea(
         child: Stack(
           children: [
             Column(
               children: [
+                // _buildStory(),
                 _buildSearchBar(),
                 Expanded(
-                  child: StreamBuilder<QuerySnapshot>(
-                    stream: _homeProvider.getStreamFireStore(
+                  child: StreamBuilder<List<DocumentSnapshot>>(
+                    stream: _friendProvider.getStreamFireStore(
                       FirestoreConstants.pathUserCollection,
-                      _limit,
+                      FirestoreConstants.pathFriendCollection,
+                      _currentUserId,
                       _textSearch,
                     ),
                     builder: (_, snapshot) {
+                      print(snapshot.hasData);
                       if (snapshot.hasData) {
-                        if ((snapshot.data?.docs.length ?? 0) > 0) {
+                        if ((snapshot.data?.length ?? 0) > 0) {
                           return ListView.builder(
                             padding: EdgeInsets.all(10),
-                            itemBuilder: (_, index) => _buildItem(snapshot.data?.docs[index]),
-                            itemCount: snapshot.data?.docs.length,
+                            itemBuilder: (_, index) =>
+                                _buildItem(snapshot.data?[index]),
+                            itemCount: snapshot.data?.length,
                             controller: _listScrollController,
                           );
                         } else {
                           return Center(
-                            child: Text("No users"),
+                            child: Text("No recent chats. Start a new chat!"),
                           );
                         }
                       } else {
@@ -200,13 +291,74 @@ class HomePageState extends State<HomePage> {
                     },
                   ),
                 ),
+                // _buildUploadStoryButton(),
               ],
             ),
             Positioned(
               child: _isLoading ? LoadingView() : SizedBox.shrink(),
-            )
+            ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onBottomNavTap,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createNewChat,
+        backgroundColor: Color.fromARGB(255, 46, 75, 133),
+        child: Icon(Icons.chat, color: Colors.white),
+        shape: CircleBorder(), // Ensures the button is circular
+      ),
+    );
+  }
+
+  Widget _buildStory() {
+    return ElevatedButton(
+      child: const Text('show stories'),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return const StoryPage();
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildUploadStoryButton() {
+    return Container(
+      child: BottomNavigationBar(
+        onTap: (int index) {
+          setState(() {
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StoryMenuPage(),
+                ),
+              );
+            }
+            // Navigate to corresponding page based on index
+          });
+        },
+        items: [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.add),
+            label: 'Story',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+        ],
       ),
     );
   }
@@ -241,8 +393,9 @@ class HomePageState extends State<HomePage> {
                 );
               },
               decoration: InputDecoration.collapsed(
-                hintText: 'Search by nickname (type exactly case sensitive)',
-                hintStyle: TextStyle(fontSize: 13, color: ColorConstants.greyColor),
+                hintText: 'Search by name',
+                hintStyle:
+                    TextStyle(fontSize: 13, color: ColorConstants.greyColor),
               ),
               style: TextStyle(fontSize: 13),
             ),
@@ -259,7 +412,8 @@ class HomePageState extends State<HomePage> {
                           _textSearch = "";
                         });
                       },
-                      child: Icon(Icons.clear_rounded, color: ColorConstants.greyColor, size: 20))
+                      child: Icon(Icons.clear_rounded,
+                          color: ColorConstants.greyColor, size: 20))
                   : SizedBox.shrink();
             },
           ),
@@ -328,8 +482,10 @@ class HomePageState extends State<HomePage> {
                               child: Center(
                                 child: CircularProgressIndicator(
                                   color: ColorConstants.themeColor,
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               ),
@@ -357,7 +513,8 @@ class HomePageState extends State<HomePage> {
                           child: Text(
                             'Nickname: ${userChat.nickname}',
                             maxLines: 1,
-                            style: TextStyle(color: ColorConstants.primaryColor),
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
@@ -366,7 +523,8 @@ class HomePageState extends State<HomePage> {
                           child: Text(
                             'About me: ${userChat.aboutMe}',
                             maxLines: 1,
-                            style: TextStyle(color: ColorConstants.primaryColor),
+                            style:
+                                TextStyle(color: ColorConstants.primaryColor),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
@@ -396,7 +554,8 @@ class HomePageState extends State<HomePage> {
               );
             },
             style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
+              backgroundColor:
+                  MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
               shape: MaterialStateProperty.all<OutlinedBorder>(
                 RoundedRectangleBorder(
                   borderRadius: BorderRadius.all(Radius.circular(10)),

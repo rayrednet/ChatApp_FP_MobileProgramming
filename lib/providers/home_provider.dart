@@ -10,15 +10,11 @@ class HomeProvider {
     return firebaseFirestore.collection(collectionPath).doc(path).update(dataNeedUpdate);
   }
 
-  Stream<QuerySnapshot> getStreamFireStore(String pathCollection, int limit, String? textSearch) {
-    if (textSearch?.isNotEmpty == true) {
-      return firebaseFirestore
-          .collection(pathCollection)
-          .limit(limit)
-          .where(FirestoreConstants.nickname, isEqualTo: textSearch)
-          .snapshots();
-    } else {
-      return firebaseFirestore.collection(pathCollection).limit(limit).snapshots();
-    }
+  Stream<QuerySnapshot> getStreamFireStore(String pathCollection, String textSearch) {
+    return firebaseFirestore
+      .collection(pathCollection)
+      .limit(1)
+      .where(FirestoreConstants.nickname, isEqualTo: textSearch)
+      .snapshots();
   }
 }

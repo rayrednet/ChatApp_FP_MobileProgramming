@@ -5,10 +5,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/constants/app_constants.dart';
 import 'package:flutter_chat_demo/firebase_options.dart';
+import 'package:flutter_chat_demo/providers/friend_provider.dart';
+import 'package:flutter_chat_demo/providers/story_page_provider.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'constants/color_constants.dart';
 import 'pages/pages.dart';
 import 'providers/providers.dart';
@@ -59,6 +60,33 @@ class MyApp extends StatelessWidget {
             firebaseStorage: this._firebaseStorage,
           ),
         ),
+        Provider<FriendProvider>(
+          create: (_) => FriendProvider(
+            firebaseFirestore: this._firebaseFirestore,
+          ),
+        ),
+        Provider<UploadStoryProvider>(
+          create: (_) => UploadStoryProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<StoryPageProvider>(
+          create: (_) => StoryPageProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+        Provider<StoryMenuProvider>(
+          create: (_) => StoryMenuProvider(
+            prefs: this.prefs,
+            firebaseFirestore: this._firebaseFirestore,
+            firebaseStorage: this._firebaseStorage,
+          ),
+        ),
+
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,
@@ -66,7 +94,17 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorSchemeSeed: ColorConstants.themeColor,
         ),
-        home: SplashPage(),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => SplashPage(),
+          '/chats': (context) => HomePage(), // Current Home Page for Chats
+          '/friends': (context) => ContactsPage(),
+          '/stories': (context) => StoryMenuPage(),
+          '/profile': (context) => UserProfilePage(),
+          '/login': (context) => LoginPage(),
+          '/settings': (context) => SettingsPage(),
+          '/full_photo': (context) => FullPhotoPage(url: '',),
+        },
         debugShowCheckedModeBanner: false,
       ),
     );
