@@ -7,3 +7,7 @@ export 'splash_page.dart';
 export 'stories.dart';
 export 'user_profile.dart';
 export 'contacts.dart';
+export 'upload_story_page.dart';
+export 'story_page.dart';
+export 'story_menu_page.dart';
+
