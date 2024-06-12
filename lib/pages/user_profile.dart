@@ -510,7 +510,7 @@ class UserProfilePageState extends State<UserProfilePage> {
                                     ),
                                     controller:
                                         TextEditingController(text: _userId),
-                                    readOnly: true,
+                                    readOnly: false,
                                   ),
                                 ),
                               ),
