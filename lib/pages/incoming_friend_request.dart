@@ -188,7 +188,7 @@ class _IncomingRequestsPageState extends State<IncomingRequestsPage> {
           : StreamBuilder<List<DocumentSnapshot>>(
                     stream: _friendProvider.getStreamFireStore(
                       FirestoreConstants.pathUserCollection,
-                      FirestoreConstants.pathFriendCollection,
+                      FirestoreConstants.pathFriendIn,
                       _currentUserId,
                       _textSearch,
                     ),
@@ -215,7 +215,14 @@ class _IncomingRequestsPageState extends State<IncomingRequestsPage> {
                                   IconButton(
                                     icon: Icon(Icons.check_circle, color: Colors.green),
                                     onPressed: () {
-                                      // Accept friend request logic
+                                      _friendProvider.acceptRequest(
+                                        FirestoreConstants.pathUserCollection,
+                                        FirestoreConstants.pathFriendCollection,
+                                        FirestoreConstants.pathFriendOut,
+                                        FirestoreConstants.pathFriendIn,
+                                        _currentUserId,
+                                        userChat.id
+                                      );
                                     },
                                   ),
                                   IconButton(

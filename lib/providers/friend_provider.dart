@@ -10,28 +10,45 @@ class FriendProvider {
     return firebaseFirestore.collection(collectionPath).doc(path).update(dataNeedUpdate);
   }
 
-  void sendRequest(String collectionPath, String friendOutPath, String friendInPath, String currentUserId, String peerId) {
+  void sendRequest(String collectionPath, String friendOutPath, String friendInPath, String currentUserId, String peerId) async {
+    var outFriend = await firebaseFirestore.collection(collectionPath)
+      .doc(currentUserId)
+      .collection(friendInPath)
+      .doc(peerId).get();
+
+    if(!outFriend.exists) return 
+
     firebaseFirestore.collection(collectionPath)
       .doc(currentUserId)
       .collection(friendOutPath)
-      .doc(peerId);
+      .doc(peerId).set({});
 
     firebaseFirestore.collection(collectionPath)
       .doc(peerId)
       .collection(friendInPath)
-      .doc(currentUserId);
+      .doc(currentUserId).set({});
   }
 
-  void acceptRequest(String collectionPath, String friendPath, String friendInPath, String currentUserId, String peerId) {
+  void acceptRequest(String collectionPath, String friendPath, String friendOutPath, String friendInPath, String currentUserId, String peerId) {
+    firebaseFirestore.collection(collectionPath)
+      .doc(currentUserId)
+      .collection(friendInPath)
+      .doc(peerId).delete();
+    
+    firebaseFirestore.collection(collectionPath)
+      .doc(peerId)
+      .collection(friendOutPath)
+      .doc(currentUserId).delete();
+
     firebaseFirestore.collection(collectionPath)
       .doc(currentUserId)
       .collection(friendPath)
-      .doc(peerId).delete();
+      .doc(peerId).set({});
 
     firebaseFirestore.collection(collectionPath)
       .doc(peerId)
       .collection(friendPath)
-      .doc(peerId);
+      .doc(currentUserId).set({});
   }
 
   Stream<List<DocumentSnapshot>>  getStreamFireStore(String pathCollection, String friendPath, String currentUserId, String? textSearch) async* {
