@@ -11,6 +11,10 @@ import 'package:flutter_chat_demo/widgets/loading_view.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import '../widgets/bottom_navbar.dart';
+import 'settings_page.dart';
+import 'login_page.dart';
 
 class UserProfilePage extends StatefulWidget {
   const UserProfilePage({super.key});
@@ -33,10 +37,18 @@ class UserProfilePageState extends State<UserProfilePage> {
   bool _isLoading = false;
   File? _avatarFile;
   late final _settingProvider = context.read<SettingProvider>();
+  late final _authProvider = context.read<AuthProvider>();
 
   final _focusNodeNickname = FocusNode();
   final _focusNodeAboutMe = FocusNode();
   final _focusNodeFriendCode = FocusNode();
+
+  final _menus = <MenuSetting>[
+    MenuSetting(title: 'Settings', icon: Icons.settings),
+    MenuSetting(title: 'Log out', icon: Icons.exit_to_app),
+  ];
+
+  int _selectedIndex = 3;
 
   @override
   void initState() {
@@ -50,7 +62,8 @@ class UserProfilePageState extends State<UserProfilePage> {
       _nickname = _settingProvider.getPref(FirestoreConstants.nickname) ?? "";
       _aboutMe = _settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
       _avatarUrl = _settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
-      _friendCode = _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
+      _friendCode =
+          _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
     });
 
     _controllerNickname = TextEditingController(text: _nickname);
@@ -60,7 +73,9 @@ class UserProfilePageState extends State<UserProfilePage> {
 
   Future<bool> _pickAvatar() async {
     final imagePicker = ImagePicker();
-    final pickedXFile = await imagePicker.pickImage(source: ImageSource.gallery).catchError((err) {
+    final pickedXFile = await imagePicker
+        .pickImage(source: ImageSource.gallery)
+        .catchError((err) {
       Fluttertoast.showToast(msg: err.toString());
       return null;
     });
@@ -90,7 +105,8 @@ class UserProfilePageState extends State<UserProfilePage> {
         friendCode: _friendCode,
       );
       _settingProvider
-          .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
+          .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId,
+              updateInfo.toJson())
           .then((_) async {
         await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
         setState(() {
@@ -114,6 +130,7 @@ class UserProfilePageState extends State<UserProfilePage> {
   void _handleUpdateData() {
     _focusNodeNickname.unfocus();
     _focusNodeAboutMe.unfocus();
+    _focusNodeFriendCode.unfocus();
 
     setState(() {
       _isLoading = true;
@@ -126,12 +143,14 @@ class UserProfilePageState extends State<UserProfilePage> {
       friendCode: _friendCode,
     );
     _settingProvider
-        .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
+        .updateDataFirestore(
+            FirestoreConstants.pathUserCollection, _userId, updateInfo.toJson())
         .then((_) async {
       await _settingProvider.setPref(FirestoreConstants.nickname, _nickname);
       await _settingProvider.setPref(FirestoreConstants.aboutMe, _aboutMe);
       await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
-      await _settingProvider.setPref(FirestoreConstants.friendCode, _friendCode);
+      await _settingProvider.setPref(
+          FirestoreConstants.friendCode, _friendCode);
 
       setState(() {
         _isLoading = false;
@@ -147,15 +166,86 @@ class UserProfilePageState extends State<UserProfilePage> {
     });
   }
 
+  void _onBottomNavTap(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/chats');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/friends');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/stories');
+        break;
+      case 3:
+        // Current page, no need to navigate
+        break;
+    }
+  }
+
+  void _onItemMenuPress(MenuSetting choice) {
+    if (choice.title == 'Log out') {
+      _handleSignOut();
+    } else {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (_) => SettingsPage()));
+    }
+  }
+
+  Future<void> _handleSignOut() async {
+    await _authProvider.handleSignOut();
+    await Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => LoginPage()),
+      (_) => false,
+    );
+  }
+
+  Widget _buildPopupMenu() {
+    return PopupMenuButton<MenuSetting>(
+      onSelected: _onItemMenuPress,
+      itemBuilder: (_) {
+        return _menus.map(
+          (choice) {
+            return PopupMenuItem<MenuSetting>(
+                value: choice,
+                child: Row(
+                  children: [
+                    Icon(
+                      choice.icon,
+                      color: ColorConstants.primaryColor,
+                    ),
+                    SizedBox(
+                      width: 10,
+                    ),
+                    Text(
+                      choice.title,
+                      style: TextStyle(color: ColorConstants.primaryColor),
+                    ),
+                  ],
+                ));
+          },
+        ).toList();
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppConstants.settingsTitle,
-          style: TextStyle(color: ColorConstants.primaryColor),
+        title: Align(
+          alignment: Alignment.centerLeft,
+          child: Text(
+            'Your Profile',
+            style: TextStyle(color: ColorConstants.primaryColor),
+          ),
         ),
         centerTitle: true,
+        actions: [_buildPopupMenu()],
       ),
       body: Stack(
         children: [
@@ -172,53 +262,85 @@ class UserProfilePageState extends State<UserProfilePage> {
                   },
                   child: Container(
                     margin: EdgeInsets.all(20),
-                    child: _avatarFile == null
-                        ? _avatarUrl.isNotEmpty
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(45),
-                                child: Image.network(
-                                  _avatarUrl,
-                                  fit: BoxFit.cover,
-                                  width: 90,
-                                  height: 90,
-                                  errorBuilder: (_, __, ___) {
-                                    return Icon(
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        ClipOval(
+                          child: _avatarFile == null
+                              ? _avatarUrl.isNotEmpty
+                                  ? Image.network(
+                                      _avatarUrl,
+                                      fit: BoxFit.cover,
+                                      width: 150,
+                                      height: 150,
+                                      errorBuilder: (_, __, ___) {
+                                        return Icon(
+                                          Icons.account_circle,
+                                          size: 150,
+                                          color: ColorConstants.greyColor,
+                                        );
+                                      },
+                                      loadingBuilder:
+                                          (_, child, loadingProgress) {
+                                        if (loadingProgress == null)
+                                          return child;
+                                        return Container(
+                                          width: 150,
+                                          height: 150,
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              color: ColorConstants.themeColor,
+                                              value: loadingProgress
+                                                          .expectedTotalBytes !=
+                                                      null
+                                                  ? loadingProgress
+                                                          .cumulativeBytesLoaded /
+                                                      loadingProgress
+                                                          .expectedTotalBytes!
+                                                  : null,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Icon(
                                       Icons.account_circle,
-                                      size: 90,
+                                      size: 150,
                                       color: ColorConstants.greyColor,
-                                    );
-                                  },
-                                  loadingBuilder: (_, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
-                                      width: 90,
-                                      height: 90,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          color: ColorConstants.themeColor,
-                                          value: loadingProgress.expectedTotalBytes != null
-                                              ? loadingProgress.cumulativeBytesLoaded /
-                                                  loadingProgress.expectedTotalBytes!
-                                              : null,
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                    )
+                              : Image.file(
+                                  _avatarFile!,
+                                  width: 150,
+                                  height: 150,
+                                  fit: BoxFit.cover,
                                 ),
-                              )
-                            : Icon(
-                                Icons.account_circle,
-                                size: 90,
-                                color: ColorConstants.greyColor,
-                              )
-                        : ClipOval(
-                            child: Image.file(
-                              _avatarFile!,
-                              width: 90,
-                              height: 90,
-                              fit: BoxFit.cover,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: GestureDetector(
+                            onTap: () {
+                              _pickAvatar().then((isSuccess) {
+                                if (isSuccess) _uploadFile();
+                              });
+                            },
+                            child: Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Color.fromARGB(255, 45, 59, 185)
+                                    .withOpacity(0.7),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.edit,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -227,95 +349,185 @@ class UserProfilePageState extends State<UserProfilePage> {
                   children: [
                     // Username
                     Container(
-                      child: Text(
-                        'Nickname',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: ColorConstants.primaryColor,
-                        ),
-                      ),
-                      margin: EdgeInsets.only(left: 10, bottom: 5, top: 10),
-                    ),
-                    Container(
-                      child: Theme(
-                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Sweetie',
-                            contentPadding: EdgeInsets.all(5),
-                            hintStyle: TextStyle(color: ColorConstants.greyColor),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.person,
+                                  color: ColorConstants.primaryColor),
+                              SizedBox(width: 10),
+                              Text(
+                                'Name',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: ColorConstants.primaryColor,
+                                ),
+                              ),
+                            ],
                           ),
-                          controller: _controllerNickname,
-                          onChanged: (value) {
-                            _nickname = value;
-                          },
-                          focusNode: _focusNodeNickname,
-                        ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              SizedBox(width: 32),
+                              Expanded(
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                      primaryColor:
+                                          ColorConstants.primaryColor),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'Sweetie',
+                                      hintStyle: TextStyle(
+                                          color: ColorConstants.greyColor),
+                                    ),
+                                    controller: _controllerNickname,
+                                    onChanged: (value) {
+                                      _nickname = value;
+                                    },
+                                    focusNode: _focusNodeNickname,
+                                  ),
+                                ),
+                              ),
+                              Icon(Icons.edit,
+                                  color: ColorConstants.primaryColor),
+                            ],
+                          ),
+                        ],
                       ),
-                      margin: EdgeInsets.only(left: 30, right: 30),
                     ),
 
                     // About me
                     Container(
-                      child: Text(
-                        'About me',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: ColorConstants.primaryColor,
-                        ),
-                      ),
-                      margin: EdgeInsets.only(left: 10, top: 30, bottom: 5),
-                    ),
-                    Container(
-                      child: Theme(
-                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            hintText: 'Fun, like travel and play PES...',
-                            contentPadding: EdgeInsets.all(5),
-                            hintStyle: TextStyle(color: ColorConstants.greyColor),
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.info,
+                                  color: ColorConstants.primaryColor),
+                              SizedBox(width: 10),
+                              Text(
+                                'About',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: ColorConstants.primaryColor,
+                                ),
+                              ),
+                            ],
                           ),
-                          controller: _controllerAboutMe,
-                          onChanged: (value) {
-                            _aboutMe = value;
-                          },
-                          focusNode: _focusNodeAboutMe,
-                        ),
+                          SizedBox(height: 5),
+                          Row(
+                            children: [
+                              SizedBox(width: 32),
+                              Expanded(
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                      primaryColor:
+                                          ColorConstants.primaryColor),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: 'No status',
+                                      hintStyle: TextStyle(
+                                          color: ColorConstants.greyColor),
+                                    ),
+                                    controller: _controllerAboutMe,
+                                    onChanged: (value) {
+                                      _aboutMe = value;
+                                    },
+                                    focusNode: _focusNodeAboutMe,
+                                  ),
+                                ),
+                              ),
+                              Icon(Icons.edit,
+                                  color: ColorConstants.primaryColor),
+                            ],
+                          ),
+                        ],
                       ),
-                      margin: EdgeInsets.only(left: 30, right: 30),
                     ),
 
-                    // Friend code
+                    // User ID
                     Container(
-                      child: Text(
-                        'Friend Code',
-                        style: TextStyle(
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.bold,
-                          color: ColorConstants.primaryColor,
+                      margin:
+                          EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+                      padding: EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF5EFCE8),
+                            const Color(0xFF736EFE),
+                          ],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
                         ),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      margin: EdgeInsets.only(left: 10, top: 30, bottom: 5),
-                    ),
-                    Container(
-                      child: Theme(
-                        data: Theme.of(context).copyWith(primaryColor: ColorConstants.primaryColor),
-                        child: TextField(
-                          decoration: InputDecoration(
-                            // hintText: 'Fun, like travel and play PES...',
-                            contentPadding: EdgeInsets.all(5),
-                            hintStyle: TextStyle(color: ColorConstants.greyColor),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(Icons.vpn_key,
+                                  color: ColorConstants.primaryColor),
+                              SizedBox(width: 10),
+                              Text(
+                                'User ID',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                  color: ColorConstants.primaryColor,
+                                ),
+                              ),
+                            ],
                           ),
-                          controller: _controllerFriendCode,
-                          onChanged: (value) {
-                            _friendCode = value;
-                          },
-                          focusNode: _focusNodeAboutMe,
-                        ),
+                          Row(
+                            children: [
+                              SizedBox(
+                                  width:
+                                      32), // Adjust the width to align with the title and icon
+                              Expanded(
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(
+                                      primaryColor:
+                                          ColorConstants.primaryColor),
+                                  child: TextField(
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      contentPadding: EdgeInsets.symmetric(
+                                          vertical: 0), // Adjust padding
+                                      hintText: 'User ID',
+                                      hintStyle: TextStyle(
+                                          color: ColorConstants.greyColor),
+                                    ),
+                                    controller:
+                                        TextEditingController(text: _userId),
+                                    readOnly: true,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.copy,
+                                    color: ColorConstants.primaryColor),
+                                onPressed: () {
+                                  Clipboard.setData(
+                                      ClipboardData(text: _userId));
+                                  Fluttertoast.showToast(
+                                      msg: "User ID copied to clipboard");
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      margin: EdgeInsets.only(left: 30, right: 30),
                     ),
                   ],
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,7 +542,8 @@ class UserProfilePageState extends State<UserProfilePage> {
                       style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(ColorConstants.primaryColor),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          ColorConstants.primaryColor),
                       padding: MaterialStateProperty.all<EdgeInsets>(
                         EdgeInsets.fromLTRB(30, 10, 30, 10),
                       ),
@@ -346,6 +559,10 @@ class UserProfilePageState extends State<UserProfilePage> {
           // Loading
           Positioned(child: _isLoading ? LoadingView() : SizedBox.shrink()),
         ],
+      ),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _selectedIndex,
+        onTap: _onBottomNavTap,
       ),
     );
   }

@@ -15,6 +15,22 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import '../widgets/bottom_navbar.dart';
+import 'new_chat_page.dart';
+import 'new_group_page.dart';
+
+enum ChatOptions { newChat, newGroup }
+
+Map<ChatOptions, String> optionsText = {
+  ChatOptions.newChat: "New chat",
+  ChatOptions.newGroup: "New group",
+};
+
+Map<ChatOptions, IconData> optionsIcons = {
+  ChatOptions.newChat: Icons.chat,
+  ChatOptions.newGroup: Icons.group,
+};
+
+String _selectedChatType = 'All';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -184,16 +200,55 @@ class HomePageState extends State<HomePage> {
     }
   }
 
+  void _createNewChat() {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+          100, 600, 20, 100), // Adjust the position as needed
+      items: ChatOptions.values.map((ChatOptions option) {
+        return PopupMenuItem<ChatOptions>(
+          value: option,
+          child: Row(
+            children: [
+              Icon(optionsIcons[option], color: Colors.black),
+              SizedBox(width: 10),
+              Text(optionsText[option]!),
+            ],
+          ),
+        );
+      }).toList(),
+    ).then((ChatOptions? selectedOption) {
+      if (selectedOption == null) return;
+
+      switch (selectedOption) {
+        case ChatOptions.newChat:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewChatPage()),
+          );
+          break;
+        case ChatOptions.newGroup:
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => NewGroupPage()),
+          );
+          break;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppConstants.homeTitle,
-          style: TextStyle(color: ColorConstants.primaryColor),
+        title: Row(
+          children: [
+            Text(
+              'ChatterBox',
+              style: TextStyle(color: ColorConstants.primaryColor),
+            ),
+          ],
         ),
-        centerTitle: true,
-        actions: [_buildPopupMenu()],
       ),
       body: SafeArea(
         child: Stack(
@@ -216,13 +271,14 @@ class HomePageState extends State<HomePage> {
                         if ((snapshot.data?.length ?? 0) > 0) {
                           return ListView.builder(
                             padding: EdgeInsets.all(10),
-                            itemBuilder: (_, index) => _buildItem(snapshot.data?[index]),
+                            itemBuilder: (_, index) =>
+                                _buildItem(snapshot.data?[index]),
                             itemCount: snapshot.data?.length,
                             controller: _listScrollController,
                           );
                         } else {
                           return Center(
-                            child: Text("No users"),
+                            child: Text("No recent chats. Start a new chat!"),
                           );
                         }
                       } else {
@@ -240,7 +296,7 @@ class HomePageState extends State<HomePage> {
             ),
             Positioned(
               child: _isLoading ? LoadingView() : SizedBox.shrink(),
-            )
+            ),
           ],
         ),
       ),
@@ -248,10 +304,16 @@ class HomePageState extends State<HomePage> {
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTap,
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _createNewChat,
+        backgroundColor: Color.fromARGB(255, 46, 75, 133),
+        child: Icon(Icons.chat, color: Colors.white),
+        shape: CircleBorder(), // Ensures the button is circular
+      ),
     );
   }
 
-  Widget _buildStory(){
+  Widget _buildStory() {
     return ElevatedButton(
       child: const Text('show stories'),
       onPressed: () {
@@ -270,17 +332,16 @@ class HomePageState extends State<HomePage> {
   Widget _buildUploadStoryButton() {
     return Container(
       child: BottomNavigationBar(
-
         onTap: (int index) {
           setState(() {
-              if(index == 1){
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => StoryMenuPage(),
-                  ),
-                );
-              }
+            if (index == 1) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => StoryMenuPage(),
+                ),
+              );
+            }
             // Navigate to corresponding page based on index
           });
         },
@@ -332,7 +393,7 @@ class HomePageState extends State<HomePage> {
                 );
               },
               decoration: InputDecoration.collapsed(
-                hintText: 'Search by nickname (type exactly case sensitive)',
+                hintText: 'Search by name',
                 hintStyle:
                     TextStyle(fontSize: 13, color: ColorConstants.greyColor),
               ),

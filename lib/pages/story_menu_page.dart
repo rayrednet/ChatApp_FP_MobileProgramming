@@ -15,7 +15,6 @@ import 'package:story/story_page_view.dart';
 
 import '../widgets/bottom_navbar.dart';
 
-
 class StoryMenuPage extends StatefulWidget {
   const StoryMenuPage({super.key});
 
@@ -36,12 +35,14 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
     } else {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => LoginPage()),
-            (_) => false,
+        (_) => false,
       );
     }
     _getStory();
   }
+
   int _selectedIndex = 2;
+
   void _onBottomNavTap(int index) {
     setState(() {
       _selectedIndex = index;
@@ -55,7 +56,7 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
         Navigator.pushReplacementNamed(context, '/friends');
         break;
       case 2:
-      // Current page, no need to navigate
+        // Current page, no need to navigate
         break;
       case 3:
         Navigator.pushReplacementNamed(context, '/profile');
@@ -68,64 +69,64 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
     setState(() {
       sampleUsers = user;
 
-      sampleUsers.forEach((user){
+      sampleUsers.forEach((user) {
         print(user.imageUrl);
       });
     });
-
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          AppConstants.storyTitle,
-          style: TextStyle(color: ColorConstants.primaryColor),
-
+        title: Row(
+          children: [
+            Text(
+              'Stories',
+              style: TextStyle(color: ColorConstants.primaryColor),
+            ),
+            Spacer(),
+            IconButton(
+              icon: Icon(Icons.add),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => UploadStoryPage(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add), // You can replace Icons.add with any desired icon
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => UploadStoryPage(),
-                ),
-              );// Your button press action here
-            },
-          ),
-        ],
+        centerTitle: false, // Ensure centerTitle is set to false
       ),
       body: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, // Max 2 columns per row
           crossAxisSpacing: 10.0, // Horizontal spacing between items
-          mainAxisSpacing: 10.0,  // Vertical spacing between items
+          mainAxisSpacing: 10.0, // Vertical spacing between items
         ),
         itemCount: sampleUsers.length,
-          itemBuilder: (context, index){
-
-            return Card(
-              child: InkWell(
-                onTap: (){
-                  print(sampleUsers[index].userName);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => StoryPage()),
-                  );
-                },
-                  child: Image.network(sampleUsers[index].imageUrl)
-              ),
-            );
-          },
+        itemBuilder: (context, index) {
+          return Card(
+            child: InkWell(
+              onTap: () {
+                print(sampleUsers[index].userName);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => StoryPage()),
+                );
+              },
+              child: Image.network(sampleUsers[index].imageUrl),
+            ),
+          );
+        },
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _selectedIndex,
         onTap: _onBottomNavTap,
       ),
-
     );
   }
 }
