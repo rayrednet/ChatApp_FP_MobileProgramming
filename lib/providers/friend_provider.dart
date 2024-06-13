@@ -11,12 +11,12 @@ class FriendProvider {
   }
 
   void sendRequest(String collectionPath, String friendOutPath, String friendInPath, String currentUserId, String peerId) async {
-    var outFriend = await firebaseFirestore.collection(collectionPath)
+    var inFriend = await firebaseFirestore.collection(collectionPath)
       .doc(currentUserId)
       .collection(friendInPath)
       .doc(peerId).get();
 
-    if(!outFriend.exists) return 
+    if(inFriend.exists) return 
 
     firebaseFirestore.collection(collectionPath)
       .doc(currentUserId)
