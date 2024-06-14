@@ -16,6 +16,7 @@ import 'package:story/story_page_view.dart';
 class StoryPage extends StatefulWidget {
   const StoryPage({super.key});
 
+
   @override
   State<StoryPage> createState() => _StoryPageState();
 }
@@ -38,14 +39,14 @@ class _StoryPageState extends State<StoryPage> {
     setState(() {
       sampleUsers = user;
     });
-
   }
 
-
+  int currentUserIndex = 0;
 
   @override
   void initState(){
     super.initState();
+
     if (_authProvider.userFirebaseId?.isNotEmpty == true) {
       _currentUserId = _authProvider.userFirebaseId!;
     } else {
@@ -67,7 +68,6 @@ class _StoryPageState extends State<StoryPage> {
   }
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: StoryPageView(
         itemBuilder: (context, pageIndex, storyIndex) {

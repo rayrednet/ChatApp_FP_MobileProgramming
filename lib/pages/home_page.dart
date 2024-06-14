@@ -313,21 +313,7 @@ class HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildStory() {
-    return ElevatedButton(
-      child: const Text('show stories'),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) {
-              return const StoryPage();
-            },
-          ),
-        );
-      },
-    );
-  }
+
 
   Widget _buildUploadStoryButton() {
     return Container(

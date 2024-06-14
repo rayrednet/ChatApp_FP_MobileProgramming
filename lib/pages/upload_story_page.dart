@@ -100,102 +100,121 @@ class _UploadStoryPageState extends State<UploadStoryPage> {
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-            AppConstants.uploadStoryTitle,
-            style: TextStyle(color: ColorConstants.primaryColor),
+          'Upload Story',
+          style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
+        backgroundColor: Colors.teal,
       ),
       body: SafeArea(
         child: Stack(
-            children: [
-              Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  SizedBox(height: 20),
                   Text(
                     prompt,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 27,
+                      color: Colors.black87,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                  SizedBox(height: 20),
                   _imageFile != null
-                      ? Image.file(_imageFile!, width: 300, height: 400) // Show image if not null
-                      : Text(''),
+                      ? Image.file(_imageFile!, width: double.infinity, height: 300, fit: BoxFit.cover)
+                      : Container(
+                    height: 300,
+                    color: Colors.grey[200],
+                    child: Icon(
+                      Icons.image,
+                      size: 100,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  SizedBox(height: 20),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: "Caption",
                       hintText: "Enter a caption for your image",
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
                     ),
-                    maxLength: 200, // Limit caption to 200 characters
+                    maxLength: 200,
                     onChanged: (value) => setState(() => _captionText = value),
                   ),
-                  Text(_captionText),
+                  SizedBox(height: 10),
+                  Text(
+                    _captionText,
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.black54,
+                    ),
+                  ),
                 ],
               ),
-              Positioned(
-                  bottom: 20,
-                  child: Row(
-
-                    children: [
-                      TextButton(
-                          onPressed: () async {
-                            if(_imageFile != null){
-                              await _uploadFile();
-                              print('upload story success');
-                              Navigator.pushReplacementNamed(context, '/stories');
-                              // Navigator.pop(context);
-                            } else {
-                              print('please pick image first');
-                            }
-
-                          },
-                          child: Text(
-                              'Upload',
-                            style: TextStyle(
-                              fontSize: 35,
-                              color: Colors.black,
-                            ),
-                          ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.grey[350]),
-
+            ),
+            Positioned(
+              bottom: 20,
+              left: 0,
+              right: 0,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (_imageFile != null) {
+                          await _uploadFile();
+                          print('upload story success');
+                          Navigator.pushReplacementNamed(context, '/stories');
+                        } else {
+                          print('please pick image first');
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                      child: Text('Upload',
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
                       ),
-                      TextButton(
-                          onPressed: () async {
-                            bool success = await _pickImage();
-                            if(success){
-                              setState(() {
-                                prompt = 'Upload Image';
-                              });
-                            }
-                          },
-                          child: Text(
-                              'Pick Image',
-                            style: TextStyle(
-                              fontSize: 35,
-                              color: Colors.black
-                            ),
-                          ),
-                        style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all(Colors.grey[350]),
-
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        bool success = await _pickImage();
+                        if (success) {
+                          setState(() {
+                            prompt = 'Upload Image';
+                          });
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueGrey,
+                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        textStyle: TextStyle(fontSize: 18),
+                      ),
+                      child: Text('Pick Image',
+                        style: TextStyle(
+                          color: Colors.white,
                         ),
                       ),
-                    ],
-                  )),
-            ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.add),
-      //   onPressed: () {
-      //     _pickImage().then((isSuccess) {
-      //       if (isSuccess) _uploadFile();
-      //     });
-      //   },
-      // ),
     );
   }
 }

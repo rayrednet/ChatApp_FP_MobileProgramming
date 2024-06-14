@@ -69,15 +69,15 @@ class StoryPageProvider {
 
 
       }
-      users.forEach((user){
-        print(user.userName);
-        print(user.imageUrl);
-        stories = user.stories;
-        stories.forEach((story){
-          print(story.caption);
-          print(story.imageUrl);
-        });
-      });
+      // users.forEach((user){
+      //   print(user.userName);
+      //   print(user.imageUrl);
+      //   stories = user.stories;
+      //   stories.forEach((story){
+      //     print(story.caption);
+      //     print(story.imageUrl);
+      //   });
+      // });
 
       if (!completer.isCompleted) {
         completer.complete(users);
