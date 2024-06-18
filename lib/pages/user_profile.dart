@@ -134,7 +134,8 @@ class UserProfilePageState extends State<UserProfilePage> {
 
     var doc = await _homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _friendCode);
 
-    if(doc.docs.length > 0) {
+    if(doc.docs.length > 0 && UserChat.fromDocument(doc.docs.last).id != _userId) {
+      
       Fluttertoast.showToast(msg: "Update failed: User ID is already used");
       return;
     } 
