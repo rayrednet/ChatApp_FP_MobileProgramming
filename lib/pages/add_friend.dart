@@ -224,12 +224,12 @@ class _AddFriendPageState extends State<AddFriendPage> {
                             children: [
                               CircleAvatar(
                                 backgroundImage: NetworkImage(
-                                    "https://example.com/profile.jpg"),
+                                    _userChat!.photoUrl),
                                 radius: 40,
                               ),
                               SizedBox(height: 10),
                               Text(
-                                "Valid User",
+                                _userChat!.nickname,
                                 style: TextStyle(fontSize: 18),
                               ),
                               SizedBox(height: 10),

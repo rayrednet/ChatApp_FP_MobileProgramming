@@ -78,6 +78,7 @@ class AuthProvider extends ChangeNotifier {
         FirestoreConstants.nickname: firebaseUser.displayName,
         FirestoreConstants.photoUrl: firebaseUser.photoURL,
         FirestoreConstants.id: firebaseUser.uid,
+        FirestoreConstants.friendCode: firebaseUser.uid,
         FirestoreConstants.createdAt: DateTime.now().millisecondsSinceEpoch.toString(),
         FirestoreConstants.chattingWith: null
       });
@@ -85,6 +86,7 @@ class AuthProvider extends ChangeNotifier {
       // Write data to local storage
       User? currentUser = firebaseUser;
       await prefs.setString(FirestoreConstants.id, currentUser.uid);
+      await prefs.setString(FirestoreConstants.friendCode, currentUser.uid);
       await prefs.setString(FirestoreConstants.nickname, currentUser.displayName ?? "");
       await prefs.setString(FirestoreConstants.photoUrl, currentUser.photoURL ?? "");
     } else {
@@ -93,6 +95,7 @@ class AuthProvider extends ChangeNotifier {
       final userChat = UserChat.fromDocument(documentSnapshot);
       // Write data to local
       await prefs.setString(FirestoreConstants.id, userChat.id);
+      await prefs.setString(FirestoreConstants.friendCode, userChat.friendCode);
       await prefs.setString(FirestoreConstants.nickname, userChat.nickname);
       await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
       await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);

@@ -350,7 +350,15 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
                               ),
                               TextButton(
                                 onPressed: () {
-                                  // Add delete action here
+                                  _friendProvider.removeFriend(
+                                    FirestoreConstants.pathUserCollection, 
+                                    FirestoreConstants.pathFriendCollection, 
+                                    _currentUserId,
+                                    widget.contact.id 
+                                  );
+                                  Navigator.of(context)
+                                      .pop();
+                                      
                                   Navigator.of(context)
                                       .pop(); // Close the dialog
                                 },

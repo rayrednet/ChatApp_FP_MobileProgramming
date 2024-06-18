@@ -38,6 +38,7 @@ class UserProfilePageState extends State<UserProfilePage> {
   File? _avatarFile;
   late final _settingProvider = context.read<SettingProvider>();
   late final _authProvider = context.read<AuthProvider>();
+  late final _homeProvider = context.read<HomeProvider>();
 
   final _focusNodeNickname = FocusNode();
   final _focusNodeAboutMe = FocusNode();
@@ -62,8 +63,7 @@ class UserProfilePageState extends State<UserProfilePage> {
       _nickname = _settingProvider.getPref(FirestoreConstants.nickname) ?? "";
       _aboutMe = _settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
       _avatarUrl = _settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
-      _friendCode =
-          _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
+      _friendCode = _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
     });
 
     _controllerNickname = TextEditingController(text: _nickname);
@@ -102,7 +102,7 @@ class UserProfilePageState extends State<UserProfilePage> {
         photoUrl: _avatarUrl,
         nickname: _nickname,
         aboutMe: _aboutMe,
-        friendCode: _friendCode,
+        friendCode: _userId,
       );
       _settingProvider
           .updateDataFirestore(FirestoreConstants.pathUserCollection, _userId,
@@ -127,10 +127,17 @@ class UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  void _handleUpdateData() {
+  void _handleUpdateData() async {
     _focusNodeNickname.unfocus();
     _focusNodeAboutMe.unfocus();
     _focusNodeFriendCode.unfocus();
+
+    var doc = await _homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _friendCode);
+
+    if(doc.docs.length > 0) {
+      Fluttertoast.showToast(msg: "Update failed: User ID is already used");
+      return;
+    } 
 
     setState(() {
       _isLoading = true;
@@ -149,8 +156,7 @@ class UserProfilePageState extends State<UserProfilePage> {
       await _settingProvider.setPref(FirestoreConstants.nickname, _nickname);
       await _settingProvider.setPref(FirestoreConstants.aboutMe, _aboutMe);
       await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
-      await _settingProvider.setPref(
-          FirestoreConstants.friendCode, _friendCode);
+      await _settingProvider.setPref(FirestoreConstants.friendCode, _friendCode);
 
       setState(() {
         _isLoading = false;
@@ -508,9 +514,11 @@ class UserProfilePageState extends State<UserProfilePage> {
                                       hintStyle: TextStyle(
                                           color: ColorConstants.greyColor),
                                     ),
-                                    controller:
-                                        TextEditingController(text: _userId),
+                                    controller: _controllerFriendCode,
                                     readOnly: false,
+                                    onChanged: (value) {
+                                      _friendCode = value;
+                                    },
                                   ),
                                 ),
                               ),
@@ -519,7 +527,7 @@ class UserProfilePageState extends State<UserProfilePage> {
                                     color: ColorConstants.primaryColor),
                                 onPressed: () {
                                   Clipboard.setData(
-                                      ClipboardData(text: _userId));
+                                      ClipboardData(text: _friendCode));
                                   Fluttertoast.showToast(
                                       msg: "User ID copied to clipboard");
                                 },

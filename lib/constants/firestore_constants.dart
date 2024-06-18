@@ -15,7 +15,7 @@ class FirestoreConstants {
   static const createdAt = "createdAt";
   static const content = "content";
   static const type = "type";
-  static const friendCode = "friendCode";
+  static const friendCode = "friend_code";
   static const pathStoryTestCollection = "storyTests";
   static const caption = "caption";
 }

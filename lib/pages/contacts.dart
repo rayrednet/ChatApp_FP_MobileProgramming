@@ -376,10 +376,12 @@ class _ContactsPageState extends State<ContactsPage> {
                                                 ),
                                                 TextButton(
                                                   onPressed: () {
-                                                    setState(() {
-                                                      displayList.removeAt(
-                                                          index); // Remove the contact
-                                                    });
+                                                    _friendProvider.removeFriend(
+                                                      FirestoreConstants.pathUserCollection, 
+                                                      FirestoreConstants.pathFriendCollection, 
+                                                      _currentUserId,
+                                                      userChat.id, 
+                                                    );
                                                     Navigator.of(context)
                                                         .pop(); // Close the dialog
                                                   },

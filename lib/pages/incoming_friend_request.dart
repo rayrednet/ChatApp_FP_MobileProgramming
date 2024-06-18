@@ -205,7 +205,7 @@ class _IncomingRequestsPageState extends State<IncomingRequestsPage> {
                             return ListTile(
                               leading: CircleAvatar(
                                 backgroundImage: NetworkImage(
-                                    'https://via.placeholder.com/150'), // Placeholder image
+                                    userChat.photoUrl), // Placeholder image
                               ),
                               title: Text(userChat.nickname),
                               subtitle: Text(userChat.aboutMe),
@@ -228,7 +228,14 @@ class _IncomingRequestsPageState extends State<IncomingRequestsPage> {
                                   IconButton(
                                     icon: Icon(Icons.cancel, color: Colors.red),
                                     onPressed: () {
-                                      // Decline friend request logic
+                                      _friendProvider.declineRequest(
+                                        FirestoreConstants.pathUserCollection,
+                                        FirestoreConstants.pathFriendCollection,
+                                        FirestoreConstants.pathFriendOut,
+                                        FirestoreConstants.pathFriendIn,
+                                        _currentUserId,
+                                        userChat.id
+                                      );
                                     },
                                   ),
                                 ],

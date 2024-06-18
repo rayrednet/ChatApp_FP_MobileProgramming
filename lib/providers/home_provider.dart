@@ -14,7 +14,7 @@ class HomeProvider {
     return firebaseFirestore
       .collection(pathCollection)
       .limit(1)
-      .where(FirestoreConstants.id, isEqualTo: textSearch)
+      .where(FirestoreConstants.friendCode, isEqualTo: textSearch)
       .get();
   }
 }
