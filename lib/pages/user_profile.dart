@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -63,9 +64,9 @@ class UserProfilePageState extends State<UserProfilePage> {
       _nickname = _settingProvider.getPref(FirestoreConstants.nickname) ?? "";
       _aboutMe = _settingProvider.getPref(FirestoreConstants.aboutMe) ?? "";
       _avatarUrl = _settingProvider.getPref(FirestoreConstants.photoUrl) ?? "";
-      _friendCode = _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
+      _friendCode =
+          _settingProvider.getPref(FirestoreConstants.friendCode) ?? "";
     });
-
     _controllerNickname = TextEditingController(text: _nickname);
     _controllerAboutMe = TextEditingController(text: _aboutMe);
     _controllerFriendCode = TextEditingController(text: _friendCode);
@@ -112,7 +113,7 @@ class UserProfilePageState extends State<UserProfilePage> {
         setState(() {
           _isLoading = false;
         });
-        Fluttertoast.showToast(msg: "Upload success");
+        showRoundedToast(context, "Profile picture changed");
       }).catchError((err) {
         setState(() {
           _isLoading = false;
@@ -127,18 +128,19 @@ class UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
-  void _handleUpdateData() async {
+  Future<void> _handleUpdateData(String field) async {
     _focusNodeNickname.unfocus();
     _focusNodeAboutMe.unfocus();
     _focusNodeFriendCode.unfocus();
 
-    var doc = await _homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _friendCode);
+    var doc = await _homeProvider.getStreamFireStore(
+        FirestoreConstants.pathUserCollection, _friendCode);
 
-    if(doc.docs.length > 0 && UserChat.fromDocument(doc.docs.last).id != _userId) {
-      
+    if (doc.docs.length > 0 &&
+        UserChat.fromDocument(doc.docs.last).id != _userId) {
       Fluttertoast.showToast(msg: "Update failed: User ID is already used");
       return;
-    } 
+    }
 
     setState(() {
       _isLoading = true;
@@ -157,13 +159,26 @@ class UserProfilePageState extends State<UserProfilePage> {
       await _settingProvider.setPref(FirestoreConstants.nickname, _nickname);
       await _settingProvider.setPref(FirestoreConstants.aboutMe, _aboutMe);
       await _settingProvider.setPref(FirestoreConstants.photoUrl, _avatarUrl);
-      await _settingProvider.setPref(FirestoreConstants.friendCode, _friendCode);
+      await _settingProvider.setPref(
+          FirestoreConstants.friendCode, _friendCode);
 
       setState(() {
         _isLoading = false;
       });
 
-      Fluttertoast.showToast(msg: "Update success");
+      switch (field) {
+        case 'name':
+          showRoundedToast(context, "Name changed");
+          break;
+        case 'about':
+          showRoundedToast(context, "About changed");
+          break;
+        case 'id':
+          showRoundedToast(context, "ID changed");
+          break;
+        default:
+          showRoundedToast(context, "Changes saved");
+      }
     }).catchError((err) {
       setState(() {
         _isLoading = false;
@@ -194,6 +209,39 @@ class UserProfilePageState extends State<UserProfilePage> {
     }
   }
 
+  void showRoundedToast(BuildContext context, String message) {
+    OverlayEntry overlayEntry = OverlayEntry(
+      builder: (context) => Positioned(
+        bottom: 50.0,
+        left: MediaQuery.of(context).size.width * 0.2,
+        width: MediaQuery.of(context).size.width * 0.6,
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+            decoration: BoxDecoration(
+              color: Color.fromARGB(255, 10, 11, 37).withOpacity(0.75),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Center(
+              child: Text(
+                message,
+                style: TextStyle(color: Colors.white, fontSize: 16.0),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Insert the overlay entry
+    Overlay.of(context)?.insert(overlayEntry);
+
+    // Remove the overlay entry after the duration
+    Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
+  }
+
   void _onItemMenuPress(MenuSetting choice) {
     if (choice.title == 'Log out') {
       _handleSignOut();
@@ -213,12 +261,19 @@ class UserProfilePageState extends State<UserProfilePage> {
 
   Widget _buildPopupMenu() {
     return PopupMenuButton<MenuSetting>(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+      ),
       onSelected: _onItemMenuPress,
       itemBuilder: (_) {
         return _menus.map(
           (choice) {
             return PopupMenuItem<MenuSetting>(
-                value: choice,
+              value: choice,
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
                 child: Row(
                   children: [
                     Icon(
@@ -233,7 +288,9 @@ class UserProfilePageState extends State<UserProfilePage> {
                       style: TextStyle(color: ColorConstants.primaryColor),
                     ),
                   ],
-                ));
+                ),
+              ),
+            );
           },
         ).toList();
       },
@@ -400,8 +457,13 @@ class UserProfilePageState extends State<UserProfilePage> {
                                   ),
                                 ),
                               ),
-                              Icon(Icons.edit,
-                                  color: ColorConstants.primaryColor),
+                              GestureDetector(
+                                onTap: () {
+                                  _handleUpdateData('name');
+                                },
+                                child: Icon(Icons.edit,
+                                    color: ColorConstants.primaryColor),
+                              ),
                             ],
                           ),
                         ],
@@ -454,8 +516,13 @@ class UserProfilePageState extends State<UserProfilePage> {
                                   ),
                                 ),
                               ),
-                              Icon(Icons.edit,
-                                  color: ColorConstants.primaryColor),
+                              GestureDetector(
+                                onTap: () {
+                                  _handleUpdateData('about');
+                                },
+                                child: Icon(Icons.edit,
+                                    color: ColorConstants.primaryColor),
+                              ),
                             ],
                           ),
                         ],
@@ -496,44 +563,87 @@ class UserProfilePageState extends State<UserProfilePage> {
                               ),
                             ],
                           ),
-                          Row(
-                            children: [
-                              SizedBox(
-                                  width:
-                                      32), // Adjust the width to align with the title and icon
-                              Expanded(
-                                child: Theme(
-                                  data: Theme.of(context).copyWith(
-                                      primaryColor:
-                                          ColorConstants.primaryColor),
-                                  child: TextField(
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      contentPadding: EdgeInsets.symmetric(
-                                          vertical: 0), // Adjust padding
-                                      hintText: 'User ID',
-                                      hintStyle: TextStyle(
-                                          color: ColorConstants.greyColor),
+                          SizedBox(height: 5),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 32.0),
+                            child: Text(
+                              'You can update your user ID by clicking the pencil icon.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: ColorConstants.primaryColor,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 5),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: BackdropFilter(
+                              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                              child: Container(
+                                margin: EdgeInsets.only(left: 32.0),
+                                padding: EdgeInsets.symmetric(horizontal: 10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(5),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color.fromARGB(
+                                              255, 212, 212, 212)
+                                          .withOpacity(0.1),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3),
                                     ),
-                                    controller: _controllerFriendCode,
-                                    readOnly: false,
-                                    onChanged: (value) {
-                                      _friendCode = value;
-                                    },
-                                  ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Theme(
+                                        data: Theme.of(context).copyWith(
+                                            primaryColor:
+                                                ColorConstants.primaryColor),
+                                        child: TextField(
+                                          decoration: InputDecoration(
+                                            border: InputBorder.none,
+                                            contentPadding:
+                                                EdgeInsets.symmetric(
+                                                    vertical: 0),
+                                            hintText: 'User ID',
+                                            hintStyle: TextStyle(
+                                                color:
+                                                    ColorConstants.greyColor),
+                                          ),
+                                          controller: _controllerFriendCode,
+                                          readOnly: false,
+                                          onChanged: (value) {
+                                            _friendCode = value;
+                                          },
+                                          focusNode: _focusNodeFriendCode,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.copy,
+                                          color: ColorConstants.primaryColor),
+                                      onPressed: () {
+                                        Clipboard.setData(
+                                            ClipboardData(text: _friendCode));
+                                        showRoundedToast(context,
+                                            "User ID copied to clipboard");
+                                      },
+                                    ),
+                                    GestureDetector(
+                                      onTap: () {
+                                        _handleUpdateData('id');
+                                      },
+                                      child: Icon(Icons.edit,
+                                          color: ColorConstants.primaryColor),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              IconButton(
-                                icon: Icon(Icons.copy,
-                                    color: ColorConstants.primaryColor),
-                                onPressed: () {
-                                  Clipboard.setData(
-                                      ClipboardData(text: _friendCode));
-                                  Fluttertoast.showToast(
-                                      msg: "User ID copied to clipboard");
-                                },
-                              ),
-                            ],
+                            ),
                           ),
                         ],
                       ),
@@ -542,24 +652,7 @@ class UserProfilePageState extends State<UserProfilePage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                 ),
 
-                // Button
-                Container(
-                  child: TextButton(
-                    onPressed: _handleUpdateData,
-                    child: Text(
-                      'Update',
-                      style: TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          ColorConstants.primaryColor),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        EdgeInsets.fromLTRB(30, 10, 30, 10),
-                      ),
-                    ),
-                  ),
-                  margin: EdgeInsets.only(top: 50, bottom: 50),
-                ),
+                // Remove the Update button here
               ],
             ),
             padding: EdgeInsets.only(left: 15, right: 15),

@@ -92,7 +92,7 @@ class MyApp extends StatelessWidget {
         title: AppConstants.appTitle,
         theme: ThemeData(
           useMaterial3: true,
-          colorSchemeSeed: ColorConstants.themeColor,
+          colorSchemeSeed: const Color.fromARGB(255, 35, 119, 245),
         ),
         initialRoute: '/',
         routes: {
