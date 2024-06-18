@@ -185,8 +185,8 @@ class _AddFriendPageState extends State<AddFriendPage> {
     var result = await _homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _friendIdController.text);
     setState(() {
       _isLoading = false;
-      _searchResult = result != null ? "found" : "not_found";
-      _userChat = UserChat.fromDocument(result.docs.last);
+      _searchResult = result.docs.length > 0 ? "found" : "not_found";
+      _userChat = _searchResult == "found" ? UserChat.fromDocument(result.docs.last) : null;
     });
   }
 
