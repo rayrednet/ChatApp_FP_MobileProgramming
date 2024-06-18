@@ -2,16 +2,49 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_chat_demo/pages/pages.dart';
+import 'package:flutter_chat_demo/pages/story_menu_page.dart'; // Ensure this import is correct
+
+void showRoundedToast(BuildContext context, String message) {
+  OverlayEntry overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      bottom: 50.0,
+      left: MediaQuery.of(context).size.width * 0.2,
+      width: MediaQuery.of(context).size.width * 0.6,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 10, 11, 37).withOpacity(0.75),
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Center(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white, fontSize: 16.0),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Insert the overlay entry
+  Overlay.of(context)?.insert(overlayEntry);
+
+  // Remove the overlay entry after the duration
+  Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
+}
 
 class UploadStoryPage extends StatefulWidget {
-  const UploadStoryPage({super.key});
+  const UploadStoryPage({super.key, required void Function(dynamic story) onStoryUploaded});
 
   @override
   State<UploadStoryPage> createState() => _UploadStoryPageState();
@@ -25,14 +58,13 @@ class _UploadStoryPageState extends State<UploadStoryPage> {
   bool _isLoading = false;
   String _imageUrl = "";
 
-  String prompt = "Please pick an Image";
-
   String _captionText = "";
 
   final _listScrollController = ScrollController();
 
   late final _uploadStoryProvider = context.read<UploadStoryProvider>();
 
+  @override
   void initState() {
     super.initState();
     if (_authProvider.userFirebaseId?.isNotEmpty == true) {
@@ -40,16 +72,16 @@ class _UploadStoryPageState extends State<UploadStoryPage> {
     } else {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => LoginPage()),
-            (_) => false,
+        (_) => false,
       );
     }
-
   }
 
-  Future<bool> _pickImage() async {
+  Future<bool> _pickImage(ImageSource source) async {
     final imagePicker = ImagePicker();
-    final pickedXFile = await imagePicker.pickImage(source: ImageSource.gallery).catchError((err) {
-      Fluttertoast.showToast(msg: err.toString());
+    final pickedXFile =
+        await imagePicker.pickImage(source: source).catchError((err) {
+      showRoundedToast(context, err.toString());
       return null;
     });
     if (pickedXFile != null) {
@@ -75,11 +107,12 @@ class _UploadStoryPageState extends State<UploadStoryPage> {
         _onSendMessage(_imageUrl, TypeMessage.image, _captionText);
         print('sending story');
       });
+      showRoundedToast(context, "Upload Successful!");
     } on FirebaseException catch (e) {
       setState(() {
         _isLoading = false;
       });
-      Fluttertoast.showToast(msg: e.message ?? e.toString());
+      showRoundedToast(context, e.message ?? e.toString());
     }
   }
 
@@ -87,133 +120,132 @@ class _UploadStoryPageState extends State<UploadStoryPage> {
     if (content.trim().isNotEmpty) {
       _uploadStoryProvider.sendMessage(content, type, _currentUserId, caption);
       if (_listScrollController.hasClients) {
-        _listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+        _listScrollController.animateTo(0,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     } else {
-      Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
+      showRoundedToast(context, 'Nothing to send');
     }
+  }
+
+  Widget _buildOptionButton(String text, IconData icon, VoidCallback onTap) {
+    return ElevatedButton.icon(
+      onPressed: onTap,
+      icon: Icon(icon, size: 24),
+      label: Text(text),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+        textStyle: TextStyle(fontSize: 18),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(
-          'Upload Story',
-          style: TextStyle(color: Colors.white),
+          'Add to story',
         ),
-        centerTitle: true,
-        backgroundColor: Colors.teal,
       ),
       body: SafeArea(
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: _imageFile == null
+            ? Column(
                 children: [
-                  SizedBox(height: 20),
-                  Text(
-                    prompt,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  _imageFile != null
-                      ? Image.file(_imageFile!, width: double.infinity, height: 300, fit: BoxFit.cover)
-                      : Container(
-                    height: 300,
-                    color: Colors.grey[200],
-                    child: Icon(
-                      Icons.image,
-                      size: 100,
-                      color: Colors.grey[400],
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: "Caption",
-                      hintText: "Enter a caption for your image",
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-                    ),
-                    maxLength: 200,
-                    onChanged: (value) => setState(() => _captionText = value),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    _captionText,
-                    style: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      color: Colors.black54,
+                  Container(
+                    padding: EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Choose your media source for your story:",
+                          style: TextStyle(
+                            fontSize: 18,
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildOptionButton('Camera', Icons.camera,
+                                  () => _pickImage(ImageSource.camera)),
+                              SizedBox(height: 20),
+                              _buildOptionButton('Gallery', Icons.photo,
+                                  () => _pickImage(ImageSource.gallery)),
+                              SizedBox(height: 20),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              bottom: 20,
-              left: 0,
-              right: 0,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    ElevatedButton(
+              )
+            : Stack(
+                children: [
+                  Positioned.fill(
+                    child: Image.file(
+                      _imageFile!,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Center(
+                    child: Container(
+                      color: Colors.black54,
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: TextFormField(
+                        style: TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: "Enter a caption for your image",
+                          hintStyle: TextStyle(color: Colors.white54),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          fillColor: Colors.black54,
+                          filled: true,
+                        ),
+                        maxLength: 200,
+                        onChanged: (value) =>
+                            setState(() => _captionText = value),
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: ElevatedButton(
                       onPressed: () async {
                         if (_imageFile != null) {
                           await _uploadFile();
                           print('upload story success');
-                          Navigator.pushReplacementNamed(context, '/stories');
+                          showRoundedToast(context, "Upload successful!");
+                          Navigator.pop(
+                              context); // Navigate back to StoryMenuPage
                         } else {
-                          print('please pick image first');
+                          showRoundedToast(
+                              context, "Please pick an imge first.");
                         }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                        backgroundColor: Color.fromARGB(255, 84, 128, 224),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                         textStyle: TextStyle(fontSize: 18),
                       ),
-                      child: Text('Upload',
+                      child: Text(
+                        'Upload',
                         style: TextStyle(
                           color: Colors.white,
                         ),
                       ),
                     ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        bool success = await _pickImage();
-                        if (success) {
-                          setState(() {
-                            prompt = 'Upload Image';
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueGrey,
-                        padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                        textStyle: TextStyle(fontSize: 18),
-                      ),
-                      child: Text('Pick Image',
-                        style: TextStyle(
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }

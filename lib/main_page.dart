@@ -3,6 +3,7 @@ import 'package:flutter_chat_demo/pages/home_page.dart';
 import 'package:flutter_chat_demo/pages/contacts.dart';
 import 'package:flutter_chat_demo/pages/story_menu_page.dart';
 import 'package:flutter_chat_demo/pages/user_profile.dart';
+import 'package:flutter_chat_demo/pages/upload_story_page.dart';
 
 class MainPage extends StatefulWidget {
   @override

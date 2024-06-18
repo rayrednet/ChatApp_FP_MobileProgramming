@@ -14,8 +14,10 @@ import 'package:story/story_image.dart';
 import 'package:story/story_page_view.dart';
 
 class StoryPage extends StatefulWidget {
-  const StoryPage({super.key});
-
+  const StoryPage(
+      {super.key,
+      required int initialPageIndex,
+      required int initialStoryIndex});
 
   @override
   State<StoryPage> createState() => _StoryPageState();
@@ -44,7 +46,7 @@ class _StoryPageState extends State<StoryPage> {
   int currentUserIndex = 0;
 
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     if (_authProvider.userFirebaseId?.isNotEmpty == true) {
@@ -52,7 +54,7 @@ class _StoryPageState extends State<StoryPage> {
     } else {
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => LoginPage()),
-            (_) => false,
+        (_) => false,
       );
     }
     _getStory();
@@ -66,12 +68,12 @@ class _StoryPageState extends State<StoryPage> {
     indicatorAnimationController.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: StoryPageView(
         itemBuilder: (context, pageIndex, storyIndex) {
-
           final user = sampleUsers[pageIndex];
           final story = user.stories[storyIndex];
           return Stack(
@@ -150,82 +152,91 @@ class _StoryPageState extends State<StoryPage> {
                       await showModalBottomSheet(
                         context: context,
                         builder: (context) => SizedBox(
-                          height: MediaQuery.of(context).size.height / 2,
+                          height: MediaQuery.of(context).size.height /
+                              4, // Adjust the height here
                           child: Padding(
                             padding: const EdgeInsets.all(24),
                             child: Column(
                               children: [
                                 Text(
                                   story.caption,
-                                  style: Theme.of(context).textTheme.headlineSmall,
+                                  style:
+                                      Theme.of(context).textTheme.headlineSmall,
                                   textAlign: TextAlign.center,
                                 ),
-                                if(user.id == _currentUserId)
+                                if (user.id == _currentUserId)
                                   Column(
                                     children: [
                                       ElevatedButton(
-                                          onPressed: (){
-                                            showDialog(
-                                              context: context,
-                                              builder: (context) => AlertDialog(
-                                                title: const Text('Enter New Caption'),
-                                                content: Form(
-                                                  key: _formKey,
-                                                  child: TextFormField(
-                                                    decoration: const InputDecoration(
-                                                      labelText: 'New Caption',
-                                                    ),
-                                                    validator: (value) {
-                                                      if (value == null || value.isEmpty) {
-                                                        return 'Please enter a caption';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onSaved: (newValue) => setState(() => _newCaption = newValue!),
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) => AlertDialog(
+                                              title: const Text(
+                                                  'Enter New Caption'),
+                                              content: Form(
+                                                key: _formKey,
+                                                child: TextFormField(
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText: 'New Caption',
                                                   ),
+                                                  validator: (value) {
+                                                    if (value == null ||
+                                                        value.isEmpty) {
+                                                      return 'Please enter a caption';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  onSaved: (newValue) =>
+                                                      setState(() =>
+                                                          _newCaption =
+                                                              newValue!),
                                                 ),
-                                                actions: [
-                                                  TextButton(
-                                                    onPressed: () => Navigator.pop(context),
-                                                    child: const Text('Cancel'),
-                                                  ),
-                                                  TextButton(
-                                                    onPressed: () async {
-                                                      if (_formKey.currentState!.validate()) {
-                                                        _formKey.currentState!.save();
-                                                        await _storyProvider.update(story.id, _newCaption);
-                                                        Navigator.pop(context);
-                                                      }
-                                                    },
-                                                    child: const Text('Update'),
-                                                  ),
-                                                ],
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Navigator.pop(context),
+                                                  child: const Text('Cancel'),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () async {
+                                                    if (_formKey.currentState!
+                                                        .validate()) {
+                                                      _formKey.currentState!
+                                                          .save();
+                                                      await _storyProvider
+                                                          .update(story.id,
+                                                              _newCaption);
+                                                      Navigator.pop(context);
+                                                    }
+                                                  },
+                                                  child: const Text('Update'),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                        child: Text('Update'),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () async {
+                                          await _storyProvider.delete(story.id);
+                                          setState(() {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (_) => HomePage(),
                                               ),
                                             );
-
-                                          },
-                                          child: Text('Update')),
-                                      ElevatedButton(
-                                          onPressed: () async {
-                                            await _storyProvider.delete(story.id);
-                                            setState(() {
-
-                                              Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (_) => HomePage(),
-                                                ),
-                                              );
-
-                                              // Navigate to corresponding page based on index
-                                            });
-                                          },
-                                          child: Text('Delete')
+                                          });
+                                        },
+                                        child: Text('Delete'),
                                       ),
                                     ],
                                   ),
-
-                              ]
+                              ],
                             ),
                           ),
                         ),
@@ -253,8 +264,7 @@ class _StoryPageState extends State<StoryPage> {
           Navigator.pop(context);
         },
       ),
-    );;
+    );
+    ;
   }
 }
-
-
