@@ -13,7 +13,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/services.dart';
-import '../widgets/bottom_navbar.dart';
 import 'settings_page.dart';
 import 'login_page.dart';
 
@@ -661,10 +660,6 @@ class UserProfilePageState extends State<UserProfilePage> {
           // Loading
           Positioned(child: _isLoading ? LoadingView() : SizedBox.shrink()),
         ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
       ),
     );
   }

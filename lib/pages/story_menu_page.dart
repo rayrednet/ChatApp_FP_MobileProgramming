@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:flutter_chat_demo/constants/constants.dart';
 import 'package:flutter_chat_demo/providers/providers.dart';
 import 'package:flutter_chat_demo/providers/story_page_provider.dart';
@@ -12,8 +11,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_chat_demo/pages/pages.dart';
 import 'package:story/story_image.dart';
 import 'package:story/story_page_view.dart';
-
-import '../widgets/bottom_navbar.dart';
 
 class StoryMenuPage extends StatefulWidget {
   const StoryMenuPage({super.key});
@@ -39,29 +36,6 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
       );
     }
     _getStory();
-  }
-
-  int _selectedIndex = 2;
-
-  void _onBottomNavTap(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/chats');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/friends');
-        break;
-      case 2:
-        // Current page, no need to navigate
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/profile');
-        break;
-    }
   }
 
   Future<void> _getStory() async {
@@ -122,10 +96,6 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
             ),
           );
         },
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
       ),
     );
   }

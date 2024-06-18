@@ -14,7 +14,6 @@ import 'package:flutter_chat_demo/widgets/widgets.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import '../widgets/bottom_navbar.dart';
 import 'new_chat_page.dart';
 import 'new_group_page.dart';
 
@@ -300,10 +299,6 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
-      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _createNewChat,
         backgroundColor: Color.fromARGB(255, 46, 75, 133),
@@ -312,8 +307,6 @@ class HomePageState extends State<HomePage> {
       ),
     );
   }
-
-
 
   Widget _buildUploadStoryButton() {
     return Container(

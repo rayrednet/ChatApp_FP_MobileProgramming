@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'constants/color_constants.dart';
 import 'pages/pages.dart';
+import 'main_page.dart';
 import 'providers/providers.dart';
 
 void main() async {
@@ -86,7 +87,6 @@ class MyApp extends StatelessWidget {
             firebaseStorage: this._firebaseStorage,
           ),
         ),
-
       ],
       child: MaterialApp(
         title: AppConstants.appTitle,
@@ -94,17 +94,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           colorSchemeSeed: const Color.fromARGB(255, 35, 119, 245),
         ),
-        initialRoute: '/',
-        routes: {
-          '/': (context) => SplashPage(),
-          '/chats': (context) => HomePage(), // Current Home Page for Chats
-          '/friends': (context) => ContactsPage(),
-          '/stories': (context) => StoryMenuPage(),
-          '/profile': (context) => UserProfilePage(),
-          '/login': (context) => LoginPage(),
-          '/settings': (context) => SettingsPage(),
-          '/full_photo': (context) => FullPhotoPage(url: '',),
-        },
+        home: MainPage(),
         debugShowCheckedModeBanner: false,
       ),
     );

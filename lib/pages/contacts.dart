@@ -17,7 +17,6 @@ import 'package:flutter_chat_demo/utils/utilities.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
-import '../widgets/bottom_navbar.dart';
 import '../constants/constants.dart';
 import 'add_friend.dart';
 import 'incoming_friend_request.dart';
@@ -476,7 +475,7 @@ class _ContactsPageState extends State<ContactsPage> {
                       } else {
                         return Center(
                           child: CircularProgressIndicator(
-                            color: ColorConstants.themeColor,
+                            color: Color.fromARGB(255, 35, 49, 245),
                           ),
                         );
                       }
@@ -485,10 +484,6 @@ class _ContactsPageState extends State<ContactsPage> {
                 // 
           ),
         ],
-      ),
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: _selectedIndex,
-        onTap: _onBottomNavTap,
       ),
     );
   }
