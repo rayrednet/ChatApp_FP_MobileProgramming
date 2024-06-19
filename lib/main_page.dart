@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chat_demo/pages/home_page.dart';
-import 'package:flutter_chat_demo/pages/contacts.dart';
 import 'package:flutter_chat_demo/pages/story_menu_page.dart';
 import 'package:flutter_chat_demo/pages/user_profile.dart';
-import 'package:flutter_chat_demo/pages/upload_story_page.dart';
 
 class MainPage extends StatefulWidget {
   @override
@@ -38,7 +36,6 @@ class _MainPageState extends State<MainPage> {
         onPageChanged: _onPageChanged,
         children: <Widget>[
           HomePage(), // Chat
-          ContactsPage(), // Friends
           StoryMenuPage(), // Stories
           UserProfilePage(), // Profile
         ],
@@ -48,10 +45,6 @@ class _MainPageState extends State<MainPage> {
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.group),
-            label: 'Friends',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.amp_stories),

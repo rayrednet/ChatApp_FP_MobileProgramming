@@ -224,11 +224,8 @@ class _StoryPageState extends State<StoryPage> {
                                         onPressed: () async {
                                           await _storyProvider.delete(story.id);
                                           setState(() {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) => HomePage(),
-                                              ),
+                                            Navigator.pop(
+                                              context, // Close the bottom sheet
                                             );
                                           });
                                         },

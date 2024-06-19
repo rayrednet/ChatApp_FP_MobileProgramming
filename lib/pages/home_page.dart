@@ -16,6 +16,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'new_chat_page.dart';
 import 'new_group_page.dart';
+import 'add_friend.dart';
+import 'incoming_friend_request.dart';
 
 enum ChatOptions { newChat, newGroup }
 
@@ -236,18 +238,37 @@ class HomePageState extends State<HomePage> {
     });
   }
 
+  void _navigateToAddFriend() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AddFriendPage()),
+    );
+  }
+
+  void _navigateToIncomingRequests() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => IncomingRequestsPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text(
-              'ChatterBox',
-              style: TextStyle(color: ColorConstants.primaryColor),
-            ),
-          ],
-        ),
+        title: Text('ChatterBox'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person_add),
+            onPressed: _navigateToAddFriend,
+            tooltip: 'Add Friend',
+          ),
+          IconButton(
+            icon: Icon(Icons.notifications),
+            onPressed: _navigateToIncomingRequests,
+            tooltip: 'Incoming Friend Requests',
+          ),
+        ],
       ),
       body: SafeArea(
         child: Stack(
@@ -299,12 +320,12 @@ class HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _createNewChat,
-        backgroundColor: Color.fromARGB(255, 46, 75, 133),
-        child: Icon(Icons.chat, color: Colors.white),
-        shape: CircleBorder(), // Ensures the button is circular
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: _createNewChat,
+      //   backgroundColor: Color.fromARGB(255, 46, 75, 133),
+      //   child: Icon(Icons.chat, color: Colors.white),
+      //   shape: CircleBorder(), // Ensures the button is circular
+      // ),
     );
   }
 
@@ -451,13 +472,13 @@ class HomePageState extends State<HomePage> {
                       ? Image.network(
                           userChat.photoUrl,
                           fit: BoxFit.cover,
-                          width: 50,
-                          height: 50,
+                          width: 40,
+                          height: 40,
                           loadingBuilder: (_, child, loadingProgress) {
                             if (loadingProgress == null) return child;
                             return Container(
-                              width: 50,
-                              height: 50,
+                              width: 40,
+                              height: 40,
                               child: Center(
                                 child: CircularProgressIndicator(
                                   color: ColorConstants.themeColor,
@@ -473,44 +494,49 @@ class HomePageState extends State<HomePage> {
                           errorBuilder: (context, object, stackTrace) {
                             return Icon(
                               Icons.account_circle,
-                              size: 50,
+                              size: 40,
                               color: ColorConstants.greyColor,
                             );
                           },
                         )
                       : Icon(
                           Icons.account_circle,
-                          size: 50,
+                          size: 40,
                           color: ColorConstants.greyColor,
                         ),
                 ),
                 Flexible(
                   child: Container(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           child: Text(
-                            'Nickname: ${userChat.nickname}',
+                            '${userChat.nickname}',
                             maxLines: 1,
-                            style:
-                                TextStyle(color: ColorConstants.primaryColor),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 5),
+                          margin: EdgeInsets.fromLTRB(10, 0, 0, 3),
                         ),
                         Container(
                           child: Text(
-                            'About me: ${userChat.aboutMe}',
+                            '${userChat.aboutMe}',
                             maxLines: 1,
-                            style:
-                                TextStyle(color: ColorConstants.primaryColor),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey,
+                            ),
                           ),
                           alignment: Alignment.centerLeft,
                           margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                        )
+                        ),
                       ],
                     ),
-                    margin: EdgeInsets.only(left: 20),
+                    margin: EdgeInsets.only(left: 10),
                   ),
                 ),
               ],
@@ -534,15 +560,15 @@ class HomePageState extends State<HomePage> {
             },
             style: ButtonStyle(
               backgroundColor:
-                  MaterialStateProperty.all<Color>(ColorConstants.greyColor2),
+                  MaterialStateProperty.all<Color>(Colors.transparent),
               shape: MaterialStateProperty.all<OutlinedBorder>(
                 RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  borderRadius: BorderRadius.all(Radius.circular(5)),
                 ),
               ),
             ),
           ),
-          margin: EdgeInsets.only(bottom: 10, left: 5, right: 5),
+          margin: EdgeInsets.only(bottom: 10, left: 10, right: 10),
         );
       }
     } else {
