@@ -186,78 +186,78 @@ class _IncomingRequestsPageState extends State<IncomingRequestsPage> {
               ),
             )
           : StreamBuilder<List<DocumentSnapshot>>(
-                    stream: _friendProvider.getStreamFireStore(
-                      FirestoreConstants.pathUserCollection,
-                      FirestoreConstants.pathFriendIn,
-                      _currentUserId,
-                      _textSearch,
-                    ),
-                    builder: (_, snapshot) {
-                      print(snapshot.hasData);
-                      if (snapshot.hasData) {
-                        if ((snapshot.data?.length ?? 0) > 0) {
-                          return ListView.builder(
-                          itemCount: snapshot.data?.length,
-                          itemBuilder: (context, index) {
-                            final request = snapshot.data?[index];
-                            if(request == null) return SizedBox.shrink();
-                            final userChat = UserChat.fromDocument(snapshot.data![index]);
-                            return ListTile(
-                              leading: CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    userChat.photoUrl), // Placeholder image
+              stream: _friendProvider.getStreamFireStore(
+                FirestoreConstants.pathUserCollection,
+                FirestoreConstants.pathFriendIn,
+                _currentUserId,
+                _textSearch,
+              ),
+              builder: (_, snapshot) {
+                print(snapshot.hasData);
+                if (snapshot.hasData) {
+                  if ((snapshot.data?.length ?? 0) > 0) {
+                    return ListView.builder(
+                      itemCount: snapshot.data?.length,
+                      itemBuilder: (context, index) {
+                        final request = snapshot.data?[index];
+                        if (request == null) return SizedBox.shrink();
+                        final userChat =
+                            UserChat.fromDocument(snapshot.data![index]);
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: NetworkImage(
+                                userChat.photoUrl), // Placeholder image
+                          ),
+                          title: Text(userChat.nickname),
+                          subtitle: Text(userChat.aboutMe),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.check_circle,
+                                    color: Colors.green),
+                                onPressed: () {
+                                  _friendProvider.acceptRequest(
+                                      FirestoreConstants.pathUserCollection,
+                                      FirestoreConstants.pathFriendCollection,
+                                      FirestoreConstants.pathFriendOut,
+                                      FirestoreConstants.pathFriendIn,
+                                      _currentUserId,
+                                      userChat.id);
+                                },
                               ),
-                              title: Text(userChat.nickname),
-                              subtitle: Text(userChat.aboutMe),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.check_circle, color: Colors.green),
-                                    onPressed: () {
-                                      _friendProvider.acceptRequest(
-                                        FirestoreConstants.pathUserCollection,
-                                        FirestoreConstants.pathFriendCollection,
-                                        FirestoreConstants.pathFriendOut,
-                                        FirestoreConstants.pathFriendIn,
-                                        _currentUserId,
-                                        userChat.id
-                                      );
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.cancel, color: Colors.red),
-                                    onPressed: () {
-                                      _friendProvider.declineRequest(
-                                        FirestoreConstants.pathUserCollection,
-                                        FirestoreConstants.pathFriendCollection,
-                                        FirestoreConstants.pathFriendOut,
-                                        FirestoreConstants.pathFriendIn,
-                                        _currentUserId,
-                                        userChat.id
-                                      );
-                                    },
-                                  ),
-                                ],
+                              IconButton(
+                                icon: Icon(Icons.cancel, color: Colors.red),
+                                onPressed: () {
+                                  _friendProvider.declineRequest(
+                                      FirestoreConstants.pathUserCollection,
+                                      FirestoreConstants.pathFriendCollection,
+                                      FirestoreConstants.pathFriendOut,
+                                      FirestoreConstants.pathFriendIn,
+                                      _currentUserId,
+                                      userChat.id);
+                                },
                               ),
-                            );
-                          },
-                        );
-                        } else {
-                          return Center(
-                            child: Text("No recent chats. Start a new chat!"),
-                          );
-                        }
-                      } else {
-                        return Center(
-                          child: CircularProgressIndicator(
-                            color: ColorConstants.themeColor,
+                            ],
                           ),
                         );
-                      }
-                    },
-                  ),
-          // : 
+                      },
+                    );
+                  } else {
+                    return Center(
+                      child: Text("No incoming friend requests"),
+                    );
+                  }
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: ColorConstants.themeColor,
+                    ),
+                  );
+                }
+              },
+            ),
+      // :
     );
   }
 }

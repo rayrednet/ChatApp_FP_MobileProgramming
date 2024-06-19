@@ -45,7 +45,7 @@ class UserProfilePageState extends State<UserProfilePage> {
   final _focusNodeFriendCode = FocusNode();
 
   final _menus = <MenuSetting>[
-    MenuSetting(title: 'Settings', icon: Icons.settings),
+    // MenuSetting(title: 'Settings', icon: Icons.settings),
     MenuSetting(title: 'Log out', icon: Icons.exit_to_app),
   ];
 
