@@ -515,7 +515,7 @@ class HomePageState extends State<HomePage> {
                             '${userChat.nickname}',
                             maxLines: 1,
                             style: TextStyle(
-                              fontWeight: FontWeight.bold,
+                              // fontWeight: FontWeight.bold,
                               fontSize: 16,
                             ),
                           ),

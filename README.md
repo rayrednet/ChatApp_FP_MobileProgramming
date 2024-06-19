@@ -1,25 +1,46 @@
-# Chat Demo
+# ChatterBox
 
-## Description
-* A chat app made by Flutter and Firebase.
-* Support login with google account, chat with any user, send text, image and sticker, update avatar and profile.
-* Demo: https://youtu.be/MOHE68LI5Eg
-* Implement: https://medium.com/@duytq94/building-a-chat-app-with-flutter-and-firebase-from-scratch-9eaa7f41782e
+ChatterBox is a mobile app created with Flutter for the Mobile Programming Course. This project was developed by Group 0 in the Mobile Programming (H) class.
 
-## Extension
-* Push notification messages.
-* Demo: https://youtu.be/TL--RKbNPt8
-* Implement: https://medium.com/@duytq94/flutter-chat-app-extended-push-notification-messages-a26c669f4675
+## Team Members
+- 5025211235 - Arda Putra
+- 5025211219 - Rayssa Ravelia
+- Fathan Abi Karami
 
-## Screenshot
+## Project Overview
+This project is based on [flutter-chat-demo](https://github.com/duytq94/flutter-chat-demo) by Duy Tran. ChatterBox is a messaging app with the following features:
+- Chat messaging
+- Stories
+- Edited user profile
+
+The main improvement made from Duy's original project is the enhancement of the core messaging functionality, including a more robust client-to-client communication.
+
+## Screenshots
+
+### Duy's Version
 <img src="https://raw.githubusercontent.com/duytq94/flutter-chat-demo/master/screenshots/FlutterChatDemo.gif" height="50%" width="50%">
 
-## How to run
-* Clone this repo
-* Run `flutter pub get`
-* Run `flutter run` (remember open simulator or connect physical device, iOS auto run additional command `pod install`)
+### Our Version
+![Our Version](screenshot_placeholder.png) <!-- Replace with the actual screenshot path -->
 
-## Major update
-* Aug, 27th, 2022 - Upgrade dependencies and fix to working fine with Flutter 3
-* Jun, 4th, 2021 - Migrating to Flutter 2 and using Dart sound null safety
-* Oct, 2nd, 2021 - Apply provider & restructure
+## How to Run
+1. Clone this repository:
+    ```sh
+    git clone https://github.com/yourusername/chatterbox.git
+    ```
+2. Navigate to the project directory:
+    ```sh
+    cd chatterbox
+    ```
+3. Fetch the dependencies:
+    ```sh
+    flutter pub get
+    ```
+4. Run the app:
+    ```sh
+    flutter run
+    ```
+    Make sure to open an emulator or connect a physical device. For iOS, additional command `pod install` may be run automatically.
+
+## Acknowledgements
+Thanks to [Duy Tran](https://github.com/duytq94) for the original [flutter-chat-demo](https://github.com/duytq94/flutter-chat-demo) project which served as the foundation for ChatterBox.

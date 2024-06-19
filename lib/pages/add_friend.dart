@@ -16,6 +16,39 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 
+void showRoundedToast(BuildContext context, String message) {
+  OverlayEntry overlayEntry = OverlayEntry(
+    builder: (context) => Positioned(
+      bottom: 50.0,
+      left: MediaQuery.of(context).size.width * 0.2,
+      width: MediaQuery.of(context).size.width * 0.6,
+      child: Material(
+        color: Colors.transparent,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: Color.fromARGB(255, 10, 11, 37).withOpacity(0.75),
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Center(
+            child: Text(
+              message,
+              style: TextStyle(color: Colors.white, fontSize: 16.0),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  // Insert the overlay entry
+  Overlay.of(context)?.insert(overlayEntry);
+
+  // Remove the overlay entry after the duration
+  Future.delayed(Duration(seconds: 2)).then((_) => overlayEntry.remove());
+}
+
 class AddFriendPage extends StatefulWidget {
   @override
   _AddFriendPageState createState() => _AddFriendPageState();
@@ -182,11 +215,14 @@ class _AddFriendPageState extends State<AddFriendPage> {
     setState(() {
       _isLoading = true;
     });
-    var result = await _homeProvider.getStreamFireStore(FirestoreConstants.pathUserCollection, _friendIdController.text);
+    var result = await _homeProvider.getStreamFireStore(
+        FirestoreConstants.pathUserCollection, _friendIdController.text);
     setState(() {
       _isLoading = false;
       _searchResult = result.docs.length > 0 ? "found" : "not_found";
-      _userChat = _searchResult == "found" ? UserChat.fromDocument(result.docs.last) : null;
+      _userChat = _searchResult == "found"
+          ? UserChat.fromDocument(result.docs.last)
+          : null;
     });
   }
 
@@ -220,40 +256,44 @@ class _AddFriendPageState extends State<AddFriendPage> {
             _isLoading
                 ? Center(child: CircularProgressIndicator())
                 : _userChat != null
-                    ?  Column(
-                            children: [
-                              CircleAvatar(
-                                backgroundImage: NetworkImage(
-                                    _userChat!.photoUrl),
-                                radius: 40,
-                              ),
-                              SizedBox(height: 10),
-                              Text(
-                                _userChat!.nickname,
-                                style: TextStyle(fontSize: 18),
-                              ),
-                              SizedBox(height: 10),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _friendProvider.sendRequest(
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircleAvatar(
+                              backgroundImage:
+                                  NetworkImage(_userChat!.photoUrl),
+                              radius: 40,
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              _userChat!.nickname,
+                              style: TextStyle(fontSize: 18),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              onPressed: () {
+                                _friendProvider.sendRequest(
                                     FirestoreConstants.pathUserCollection,
                                     FirestoreConstants.pathFriendOut,
                                     FirestoreConstants.pathFriendIn,
                                     _currentUserId,
-                                    _userChat!.id
-                                  );
-                                },
-                                child: Text('Send Friend Request'),
-                              ),
-                            ],
-                          )
-                        : Center(
-                            child: Text(
-                              'User not found',
-                              style: TextStyle(fontSize: 18, color: Colors.red),
+                                    _userChat!.id);
+                                showRoundedToast(
+                                    context, "Friend request sent!");
+                              },
+                              child: Text('Send Friend Request'),
                             ),
-                          )
-                    // : Container(),
+                          ],
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          'User not found',
+                          style: TextStyle(fontSize: 18, color: Colors.red),
+                        ),
+                      )
+            // : Container(),
           ],
         ),
       ),
