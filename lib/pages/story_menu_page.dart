@@ -43,6 +43,7 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
 
   Future<void> _getStory() async {
     var user = await _storyMenuProvider.getStory();
+    if(!mounted) return;
     setState(() {
       sampleUsers = user;
 
@@ -53,6 +54,7 @@ class _StoryMenuPageState extends State<StoryMenuPage> {
   }
 
   void _addUploadedStory(dynamic uploadedStory) {
+    if(!mounted) return;
     setState(() {
       sampleUsers.insert(0, uploadedStory);
     });
