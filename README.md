@@ -21,14 +21,14 @@ The main improvement made from Duy's original project is the enhancement of the 
 <img src="https://raw.githubusercontent.com/duytq94/flutter-chat-demo/master/screenshots/FlutterChatDemo.gif" height="50%" width="50%">
 
 ### Our Version
-![Our Version](images/app_icon.png) <!-- Replace with the actual screenshot path -->
+![Our Version](images/app_icon.png) >
 
 ## Video Demonstration
 ### User 1 Receiving the Message
-[User 1 Video](screenshots/user1.mp4) <!-- Replace `path_to_user1_video.mp4` with the actual path -->
+[User 1 Video](https://youtu.be/WIaD7IJpfUw) 
 
 ### User 2 Receiving the Message
-[User 2 Video](screenshots/user2.mp4) <!-- Replace `path_to_user2_video.mp4` with the actual path -->
+[User 2 Video](https://youtu.be/i6UHnFO7wJk) 
 
 
 ## How to Run
