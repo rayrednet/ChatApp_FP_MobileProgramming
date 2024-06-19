@@ -61,7 +61,8 @@ class ChatPageState extends State<ChatPage> {
 
   void _scrollListener() {
     if (!_listScrollController.hasClients) return;
-    if (_listScrollController.offset >= _listScrollController.position.maxScrollExtent &&
+    if (_listScrollController.offset >=
+            _listScrollController.position.maxScrollExtent &&
         !_listScrollController.position.outOfRange &&
         _limit <= _listMessage.length) {
       setState(() {
@@ -104,7 +105,9 @@ class ChatPageState extends State<ChatPage> {
 
   Future<bool> _pickImage() async {
     final imagePicker = ImagePicker();
-    final pickedXFile = await imagePicker.pickImage(source: ImageSource.gallery).catchError((err) {
+    final pickedXFile = await imagePicker
+        .pickImage(source: ImageSource.gallery)
+        .catchError((err) {
       Fluttertoast.showToast(msg: err.toString());
       return null;
     });
@@ -149,12 +152,15 @@ class ChatPageState extends State<ChatPage> {
   void _onSendMessage(String content, int type) {
     if (content.trim().isNotEmpty) {
       _chatInputController.clear();
-      _chatProvider.sendMessage(content, type, _groupChatId, _currentUserId, widget.arguments.peerId);
+      _chatProvider.sendMessage(
+          content, type, _groupChatId, _currentUserId, widget.arguments.peerId);
       if (_listScrollController.hasClients) {
-        _listScrollController.animateTo(0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+        _listScrollController.animateTo(0,
+            duration: Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     } else {
-      Fluttertoast.showToast(msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
+      Fluttertoast.showToast(
+          msg: 'Nothing to send', backgroundColor: ColorConstants.greyColor);
     }
   }
 
@@ -174,14 +180,18 @@ class ChatPageState extends State<ChatPage> {
                   ),
                   padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                   width: 200,
-                  decoration: BoxDecoration(color: ColorConstants.greyColor2, borderRadius: BorderRadius.circular(8)),
-                  margin: EdgeInsets.only(bottom: _isLastMessageRight(index) ? 20 : 10, right: 10),
+                  decoration: BoxDecoration(
+                      color: ColorConstants.greyColor2,
+                      borderRadius: BorderRadius.circular(8)),
+                  margin: EdgeInsets.only(
+                      bottom: _isLastMessageRight(index) ? 20 : 10, right: 10),
                 )
               : messageChat.type == TypeMessage.image
                   // Image
                   ? Container(
                       clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                      decoration:
+                          BoxDecoration(borderRadius: BorderRadius.circular(8)),
                       child: GestureDetector(
                         child: Image.network(
                           messageChat.content,
@@ -199,8 +209,10 @@ class ChatPageState extends State<ChatPage> {
                               child: Center(
                                 child: CircularProgressIndicator(
                                   color: ColorConstants.themeColor,
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                  value: loadingProgress.expectedTotalBytes !=
+                                          null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                          loadingProgress.expectedTotalBytes!
                                       : null,
                                 ),
                               ),
@@ -229,7 +241,9 @@ class ChatPageState extends State<ChatPage> {
                           );
                         },
                       ),
-                      margin: EdgeInsets.only(bottom: _isLastMessageRight(index) ? 20 : 10, right: 10),
+                      margin: EdgeInsets.only(
+                          bottom: _isLastMessageRight(index) ? 20 : 10,
+                          right: 10),
                     )
                   // Sticker
                   : Container(
@@ -239,7 +253,9 @@ class ChatPageState extends State<ChatPage> {
                         height: 100,
                         fit: BoxFit.cover,
                       ),
-                      margin: EdgeInsets.only(bottom: _isLastMessageRight(index) ? 20 : 10, right: 10),
+                      margin: EdgeInsets.only(
+                          bottom: _isLastMessageRight(index) ? 20 : 10,
+                          right: 10),
                     ),
         ],
         mainAxisAlignment: MainAxisAlignment.end,
@@ -260,8 +276,10 @@ class ChatPageState extends State<ChatPage> {
                             return Center(
                               child: CircularProgressIndicator(
                                 color: ColorConstants.themeColor,
-                                value: loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
                                     : null,
                               ),
                             );
@@ -287,14 +305,16 @@ class ChatPageState extends State<ChatPage> {
                         ),
                         padding: EdgeInsets.fromLTRB(15, 10, 15, 10),
                         width: 200,
-                        decoration:
-                            BoxDecoration(color: ColorConstants.primaryColor, borderRadius: BorderRadius.circular(8)),
+                        decoration: BoxDecoration(
+                            color: ColorConstants.primaryColor,
+                            borderRadius: BorderRadius.circular(8)),
                         margin: EdgeInsets.only(left: 10),
                       )
                     : messageChat.type == TypeMessage.image
                         ? Container(
                             clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8)),
                             child: GestureDetector(
                               child: Image.network(
                                 messageChat.content,
@@ -312,9 +332,13 @@ class ChatPageState extends State<ChatPage> {
                                     child: Center(
                                       child: CircularProgressIndicator(
                                         color: ColorConstants.themeColor,
-                                        value: loadingProgress.expectedTotalBytes != null
-                                            ? loadingProgress.cumulativeBytesLoaded /
-                                                loadingProgress.expectedTotalBytes!
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes!
                                             : null,
                                       ),
                                     ),
@@ -334,7 +358,8 @@ class ChatPageState extends State<ChatPage> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (_) => FullPhotoPage(url: messageChat.content),
+                                    builder: (_) =>
+                                        FullPhotoPage(url: messageChat.content),
                                   ),
                                 );
                               },
@@ -348,7 +373,9 @@ class ChatPageState extends State<ChatPage> {
                               height: 100,
                               fit: BoxFit.cover,
                             ),
-                            margin: EdgeInsets.only(bottom: _isLastMessageRight(index) ? 20 : 10, right: 10),
+                            margin: EdgeInsets.only(
+                                bottom: _isLastMessageRight(index) ? 20 : 10,
+                                right: 10),
                           ),
               ],
             ),
@@ -357,9 +384,13 @@ class ChatPageState extends State<ChatPage> {
             _isLastMessageLeft(index)
                 ? Container(
                     child: Text(
-                      DateFormat('dd MMM kk:mm')
-                          .format(DateTime.fromMillisecondsSinceEpoch(int.parse(messageChat.timestamp))),
-                      style: TextStyle(color: ColorConstants.greyColor, fontSize: 12, fontStyle: FontStyle.italic),
+                      DateFormat('dd MMM kk:mm').format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              int.parse(messageChat.timestamp))),
+                      style: TextStyle(
+                          color: ColorConstants.greyColor,
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic),
                     ),
                     margin: EdgeInsets.only(left: 50, top: 5, bottom: 5),
                   )
@@ -373,7 +404,10 @@ class ChatPageState extends State<ChatPage> {
   }
 
   bool _isLastMessageLeft(int index) {
-    if ((index > 0 && _listMessage[index - 1].get(FirestoreConstants.idFrom) == _currentUserId) || index == 0) {
+    if ((index > 0 &&
+            _listMessage[index - 1].get(FirestoreConstants.idFrom) ==
+                _currentUserId) ||
+        index == 0) {
       return true;
     } else {
       return false;
@@ -381,7 +415,10 @@ class ChatPageState extends State<ChatPage> {
   }
 
   bool _isLastMessageRight(int index) {
-    if ((index > 0 && _listMessage[index - 1].get(FirestoreConstants.idFrom) != _currentUserId) || index == 0) {
+    if ((index > 0 &&
+            _listMessage[index - 1].get(FirestoreConstants.idFrom) !=
+                _currentUserId) ||
+        index == 0) {
       return true;
     } else {
       return false;
@@ -465,7 +502,8 @@ class ChatPageState extends State<ChatPage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       ),
       decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: ColorConstants.greyColor2, width: 0.5)),
+        border: Border(
+            top: BorderSide(color: ColorConstants.greyColor2, width: 0.5)),
         color: Colors.white,
       ),
       padding: EdgeInsets.symmetric(vertical: 8),
@@ -523,7 +561,8 @@ class ChatPageState extends State<ChatPage> {
                 onSubmitted: (_) {
                   _onSendMessage(_chatInputController.text, TypeMessage.text);
                 },
-                style: TextStyle(color: ColorConstants.primaryColor, fontSize: 15),
+                style:
+                    TextStyle(color: ColorConstants.primaryColor, fontSize: 15),
                 controller: _chatInputController,
                 decoration: InputDecoration.collapsed(
                   hintText: 'Type your message...',
@@ -540,7 +579,8 @@ class ChatPageState extends State<ChatPage> {
               margin: EdgeInsets.symmetric(horizontal: 8),
               child: IconButton(
                 icon: Icon(Icons.send),
-                onPressed: () => _onSendMessage(_chatInputController.text, TypeMessage.text),
+                onPressed: () =>
+                    _onSendMessage(_chatInputController.text, TypeMessage.text),
                 color: ColorConstants.primaryColor,
               ),
             ),
@@ -551,7 +591,9 @@ class ChatPageState extends State<ChatPage> {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: ColorConstants.greyColor2, width: 0.5)), color: Colors.white),
+          border: Border(
+              top: BorderSide(color: ColorConstants.greyColor2, width: 0.5)),
+          color: Colors.white),
     );
   }
 
@@ -566,7 +608,8 @@ class ChatPageState extends State<ChatPage> {
                   if (_listMessage.length > 0) {
                     return ListView.builder(
                       padding: EdgeInsets.all(10),
-                      itemBuilder: (_, index) => _buildItemMessage(index, snapshot.data?.docs[index]),
+                      itemBuilder: (_, index) =>
+                          _buildItemMessage(index, snapshot.data?.docs[index]),
                       itemCount: snapshot.data?.docs.length,
                       reverse: true,
                       controller: _listScrollController,
@@ -597,5 +640,8 @@ class ChatPageArguments {
   final String peerAvatar;
   final String peerNickname;
 
-  ChatPageArguments({required this.peerId, required this.peerAvatar, required this.peerNickname});
+  ChatPageArguments(
+      {required this.peerId,
+      required this.peerAvatar,
+      required this.peerNickname});
 }

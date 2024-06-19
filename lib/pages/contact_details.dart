@@ -188,16 +188,21 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    child: Icon(Icons.person, size: 50),
+                    backgroundImage: widget.contact.photoUrl.isNotEmpty
+                        ? NetworkImage(widget.contact.photoUrl)
+                        : null,
+                    child: widget.contact.photoUrl.isEmpty
+                        ? Icon(Icons.person, size: 50)
+                        : null,
                   ),
                   SizedBox(height: 20),
                   Text(
-                    widget.contact.nickname!,
+                    widget.contact.nickname,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    widget.contact.aboutMe!,
+                    widget.contact.aboutMe,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ],
@@ -206,22 +211,22 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
             SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () {
-              if (Utilities.isKeyboardShowing(context)) {
-                Utilities.closeKeyboard();
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChatPage(
-                    arguments: ChatPageArguments(
-                      peerId: widget.contact.id,
-                      peerAvatar: widget.contact.photoUrl,
-                      peerNickname: widget.contact.nickname,
+                if (Utilities.isKeyboardShowing(context)) {
+                  Utilities.closeKeyboard();
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatPage(
+                      arguments: ChatPageArguments(
+                        peerId: widget.contact.id,
+                        peerAvatar: widget.contact.photoUrl,
+                        peerNickname: widget.contact.nickname,
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
               icon: Icon(Icons.message,
                   color: const Color.fromARGB(255, 11, 69, 117)),
               label: Text('Message',
@@ -279,7 +284,8 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
                           return StatefulBuilder(
                             builder: (context, setState) {
                               return AlertDialog(
-                                title: Text('Report ${widget.contact.nickname}?'),
+                                title:
+                                    Text('Report ${widget.contact.nickname}?'),
                                 content: Column(
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,14 +357,12 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
                               TextButton(
                                 onPressed: () {
                                   _friendProvider.removeFriend(
-                                    FirestoreConstants.pathUserCollection, 
-                                    FirestoreConstants.pathFriendCollection, 
-                                    _currentUserId,
-                                    widget.contact.id 
-                                  );
-                                  Navigator.of(context)
-                                      .pop();
-                                      
+                                      FirestoreConstants.pathUserCollection,
+                                      FirestoreConstants.pathFriendCollection,
+                                      _currentUserId,
+                                      widget.contact.id);
+                                  Navigator.of(context).pop();
+
                                   Navigator.of(context)
                                       .pop(); // Close the dialog
                                 },

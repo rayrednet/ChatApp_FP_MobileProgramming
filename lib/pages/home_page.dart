@@ -18,6 +18,8 @@ import 'new_chat_page.dart';
 import 'new_group_page.dart';
 import 'add_friend.dart';
 import 'incoming_friend_request.dart';
+import 'contact_details.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 enum ChatOptions { newChat, newGroup }
 
@@ -464,106 +466,167 @@ class HomePageState extends State<HomePage> {
         return SizedBox.shrink();
       } else {
         return Container(
-          child: TextButton(
-            child: Row(
+          child: Slidable(
+            endActionPane: ActionPane(
+              motion: ScrollMotion(),
+              extentRatio:
+                  0.25, // Adjust this value to make the delete button smaller
               children: [
-                ClipOval(
-                  child: userChat.photoUrl.isNotEmpty
-                      ? Image.network(
-                          userChat.photoUrl,
-                          fit: BoxFit.cover,
-                          width: 40,
-                          height: 40,
-                          loadingBuilder: (_, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              width: 40,
-                              height: 40,
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: ColorConstants.themeColor,
-                                  value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                          loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, object, stackTrace) {
-                            return Icon(
-                              Icons.account_circle,
-                              size: 40,
-                              color: ColorConstants.greyColor,
-                            );
-                          },
-                        )
-                      : Icon(
-                          Icons.account_circle,
-                          size: 40,
-                          color: ColorConstants.greyColor,
-                        ),
-                ),
-                Flexible(
-                  child: Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          child: Text(
-                            '${userChat.nickname}',
-                            maxLines: 1,
-                            style: TextStyle(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                SlidableAction(
+                  onPressed: (context) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Remove Contact'),
+                          content: Text(
+                              'Are you sure you want to remove ${userChat.nickname}?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: Text('Cancel'),
                             ),
-                          ),
-                          alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 3),
-                        ),
-                        Container(
-                          child: Text(
-                            '${userChat.aboutMe}',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey,
+                            TextButton(
+                              onPressed: () {
+                                _friendProvider.removeFriend(
+                                  FirestoreConstants.pathUserCollection,
+                                  FirestoreConstants.pathFriendCollection,
+                                  _currentUserId,
+                                  userChat.id,
+                                );
+                                Navigator.of(context).pop(); // Close the dialog
+                              },
+                              child: Text('Remove'),
                             ),
-                          ),
-                          alignment: Alignment.centerLeft,
-                          margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
-                        ),
-                      ],
-                    ),
-                    margin: EdgeInsets.only(left: 10),
-                  ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  icon: Icons.delete,
+                  label: 'Delete',
                 ),
               ],
             ),
-            onPressed: () {
-              if (Utilities.isKeyboardShowing(context)) {
-                Utilities.closeKeyboard();
-              }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => ChatPage(
-                    arguments: ChatPageArguments(
-                      peerId: userChat.id,
-                      peerAvatar: userChat.photoUrl,
-                      peerNickname: userChat.nickname,
+            child: TextButton(
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ContactDetailsPage(
+                            contact: userChat,
+                          ),
+                        ),
+                      );
+                    },
+                    child: ClipOval(
+                      child: userChat.photoUrl.isNotEmpty
+                          ? Image.network(
+                              userChat.photoUrl,
+                              fit: BoxFit.cover,
+                              width: 40,
+                              height: 40,
+                              loadingBuilder: (_, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  width: 40,
+                                  height: 40,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: ColorConstants.themeColor,
+                                      value:
+                                          loadingProgress.expectedTotalBytes !=
+                                                  null
+                                              ? loadingProgress
+                                                      .cumulativeBytesLoaded /
+                                                  loadingProgress
+                                                      .expectedTotalBytes!
+                                              : null,
+                                    ),
+                                  ),
+                                );
+                              },
+                              errorBuilder: (context, object, stackTrace) {
+                                return Icon(
+                                  Icons.account_circle,
+                                  size: 40,
+                                  color: ColorConstants.greyColor,
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.account_circle,
+                              size: 40,
+                              color: ColorConstants.greyColor,
+                            ),
                     ),
                   ),
-                ),
-              );
-            },
-            style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all<Color>(Colors.transparent),
-              shape: MaterialStateProperty.all<OutlinedBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
+                  Flexible(
+                    child: Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: Text(
+                              '${userChat.nickname}',
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            alignment: Alignment.centerLeft,
+                            margin: EdgeInsets.fromLTRB(10, 0, 0, 3),
+                          ),
+                          Container(
+                            child: Text(
+                              '${userChat.aboutMe}',
+                              maxLines: 1,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey,
+                              ),
+                            ),
+                            alignment: Alignment.centerLeft,
+                            margin: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                          ),
+                        ],
+                      ),
+                      margin: EdgeInsets.only(left: 10),
+                    ),
+                  ),
+                ],
+              ),
+              onPressed: () {
+                if (Utilities.isKeyboardShowing(context)) {
+                  Utilities.closeKeyboard();
+                }
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ChatPage(
+                      arguments: ChatPageArguments(
+                        peerId: userChat.id,
+                        peerAvatar: userChat.photoUrl,
+                        peerNickname: userChat.nickname,
+                      ),
+                    ),
+                  ),
+                );
+              },
+              style: ButtonStyle(
+                backgroundColor:
+                    MaterialStateProperty.all<Color>(Colors.transparent),
+                shape: MaterialStateProperty.all<OutlinedBorder>(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                  ),
                 ),
               ),
             ),
