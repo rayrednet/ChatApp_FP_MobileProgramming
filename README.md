@@ -5,7 +5,7 @@ ChatterBox is a mobile app created with Flutter for the Mobile Programming Cours
 ## Team Members
 - 5025211235 - Arda Putra
 - 5025211219 - Rayssa Ravelia
-- Fathan Abi Karami
+- 5025211156 - Fathan Abi Karami
 
 ## Project Overview
 This project is based on [flutter-chat-demo](https://github.com/duytq94/flutter-chat-demo) by Duy Tran. ChatterBox is a messaging app with the following features:
@@ -21,7 +21,15 @@ The main improvement made from Duy's original project is the enhancement of the 
 <img src="https://raw.githubusercontent.com/duytq94/flutter-chat-demo/master/screenshots/FlutterChatDemo.gif" height="50%" width="50%">
 
 ### Our Version
-![Our Version](screenshot_placeholder.png) <!-- Replace with the actual screenshot path -->
+![Our Version](images/app_icon.png) <!-- Replace with the actual screenshot path -->
+
+## Video Demonstration
+### User 1 Receiving the Message
+[User 1 Video](screenshots/user1.mp4) <!-- Replace `path_to_user1_video.mp4` with the actual path -->
+
+### User 2 Receiving the Message
+[User 2 Video](screenshots/user2.mp4) <!-- Replace `path_to_user2_video.mp4` with the actual path -->
+
 
 ## How to Run
 1. Clone this repository:
