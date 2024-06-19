@@ -25,10 +25,10 @@ The main improvement made from Duy's original project is the enhancement of the 
 
 ## Video Demonstration
 ### User 1 Receiving the Message
-[User 1 Video](https://youtu.be/WIaD7IJpfUw) 
+[![User 1 Video](https://img.youtube.com/vi/WIaD7IJpfUw/0.jpg)](https://www.youtube.com/watch?v=WIaD7IJpfUw)
 
 ### User 2 Receiving the Message
-[User 2 Video](https://youtu.be/i6UHnFO7wJk) 
+[![User 2 Video](https://img.youtube.com/vi/i6UHnFO7wJk/0.jpg)](https://www.youtube.com/watch?v=i6UHnFO7wJk)
 
 
 ## How to Run
